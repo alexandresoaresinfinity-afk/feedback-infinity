@@ -11,13 +11,24 @@ function salvarUsuarios(usuarios) {
   localStorage.setItem("usuarios", JSON.stringify(usuarios));
 }
 
-// Cria o Admin padrão na primeira vez (sem precisar do console)
+// Cria o Admin padrão na primeira vez
 function garantirAdmin() {
   const usuarios = pegarUsuarios();
   if (Object.keys(usuarios).length === 0) {
     usuarios["Alexandre Soares"] = { codigo: "admin123", perfil: "Admin" };
     salvarUsuarios(usuarios);
   }
+}
+
+// ===== NAVEGAÇÃO ENTRE ABAS =====
+function mostrarAba(idAba, botao) {
+  // Esconde todas as abas
+  document.querySelectorAll(".aba").forEach(aba => aba.classList.add("escondido"));
+  // Mostra a aba escolhida
+  document.getElementById(idAba).classList.remove("escondido");
+  // Marca o botão do menu como ativo
+  document.querySelectorAll(".menu-item").forEach(item => item.classList.remove("ativo"));
+  if (botao) botao.classList.add("ativo");
 }
 
 // ===== LOGIN =====
@@ -42,13 +53,24 @@ function fazerLogin() {
   document.getElementById("usuario-nome").textContent = nome;
   document.getElementById("usuario-perfil").textContent = usuario.perfil;
 
+  // Só o Admin vê a aba de cadastro
+  const abaCadastro = document.getElementById("aba-cadastro");
+  const botaoCadastro = document.querySelector('.menu-item[onclick*="aba-cadastro"]');
   if (usuario.perfil === "Admin") {
-    document.getElementById("area-cadastro").classList.remove("escondido");
+    abaCadastro.classList.remove("escondido");
+    botaoCadastro.style.display = "block";
     mostrarUsuarios();
+  } else {
+    abaCadastro.classList.add("escondido");
+    botaoCadastro.style.display = "none";
   }
+
+  // Mostra a primeira aba (Feedbacks)
+  mostrarAba("aba-feedbacks", document.querySelector('.menu-item[onclick*="aba-feedbacks"]'));
 
   carregarPessoas();
   carregarElogios();
+  carregarFeedbacks();
 }
 
 function sair() {
@@ -89,19 +111,80 @@ function mostrarUsuarios() {
   });
 }
 
+// ===== CARREGAR PESSOAS NOS SELECTS =====
 function carregarPessoas() {
-  const select = document.getElementById("e-para");
-  select.innerHTML = '<option value="">Selecione a pessoa...</option>';
   const usuarios = pegarUsuarios();
-  Object.keys(usuarios).forEach(nome => {
+  const nomes = Object.keys(usuarios);
+
+  // Select de feedback
+  const selF = document.getElementById("f-para");
+  selF.innerHTML = '<option value="">Selecione a pessoa...</option>';
+  nomes.forEach(nome => {
     const opt = document.createElement("option");
     opt.value = nome;
     opt.textContent = nome;
-    select.appendChild(opt);
+    selF.appendChild(opt);
+  });
+
+  // Select de elogio
+  const selE = document.getElementById("e-para");
+  selE.innerHTML = '<option value="">Selecione a pessoa...</option>';
+  nomes.forEach(nome => {
+    const opt = document.createElement("option");
+    opt.value = nome;
+    opt.textContent = nome;
+    selE.appendChild(opt);
   });
 }
 
-// ===== ELOGIO =====
+// ===== ENVIAR FEEDBACK =====
+document.getElementById("form-feedback").addEventListener("submit", async function (e) {
+  e.preventDefault();
+  const usuario = JSON.parse(sessionStorage.getItem("usuario"));
+  const para = document.getElementById("f-para").value;
+  const bom = document.getElementById("f-bom").value.trim();
+  const melhorar = document.getElementById("f-melhorar").value.trim();
+  if (!para || !bom) { alert("Preencha para quem e o que foi bom."); return; }
+  const dados = { acao: "novo_feedback", de: usuario.nome, para, bom, melhorar, data: new Date().toLocaleString("pt-BR") };
+  try {
+    await fetch(API_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(dados) });
+    alert("Feedback enviado! ✅");
+    document.getElementById("f-bom").value = "";
+    document.getElementById("f-melhorar").value = "";
+    carregarFeedbacks();
+  } catch (erro) {
+    alert("Falha de conexão. Detalhe: " + erro);
+  }
+});
+
+// ===== CARREGAR FEEDBACKS =====
+async function carregarFeedbacks() {
+  const lista = document.getElementById("lista-feedbacks");
+  lista.innerHTML = "<p>Carregando feedbacks...</p>";
+  try {
+    const resposta = await fetch(API_URL + "?acao=listar_feedbacks");
+    const dados = await resposta.json();
+    lista.innerHTML = "";
+    if (!dados || dados.length === 0) { lista.innerHTML = "<p>Ainda não há feedbacks.</p>"; return; }
+    dados.forEach(fb => {
+      const div = document.createElement("div");
+      div.className = "feedback-item";
+      div.innerHTML = `
+        <div class="feedback-cabecalho">
+          <span>${fb.de} → ${fb.para}</span>
+          <span class="feedback-data">${fb.data}</span>
+        </div>
+        <div class="feedback-texto"><strong>Bom:</strong> ${fb.bom}</div>
+        ${fb.melhorar ? `<div class="feedback-texto"><strong>Melhorar:</strong> ${fb.melhorar}</div>` : ""}
+      `;
+      lista.appendChild(div);
+    });
+  } catch (erro) {
+    lista.innerHTML = "<p>Não foi possível carregar os feedbacks.</p>";
+  }
+}
+
+// ===== ENVIAR ELOGIO =====
 document.getElementById("form-elogio").addEventListener("submit", async function (e) {
   e.preventDefault();
   const usuario = JSON.parse(sessionStorage.getItem("usuario"));
@@ -119,6 +202,7 @@ document.getElementById("form-elogio").addEventListener("submit", async function
   }
 });
 
+// ===== CARREGAR ELOGIOS =====
 async function carregarElogios() {
   const lista = document.getElementById("lista-elogios");
   lista.innerHTML = "<p>Carregando elogios...</p>";

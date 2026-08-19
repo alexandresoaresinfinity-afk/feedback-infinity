@@ -29,78 +29,156 @@
   </div>
 
   <!-- ===== SISTEMA (aparece depois do login) ===== -->
-  <div id="sistema" class="tela escondido">
-    <header class="topo">
-      <div class="logo-marca">
-        <img src="logo.png" alt="Infinity Piercing" class="logo">
-        <div class="logo-texto">
-          <span class="logo-linha1">INFINITY</span>
-          <span class="logo-linha2">PIERCING</span>
+  <div id="sistema" class="escondido">
+    <div class="layout">
+
+      <!-- ===== MENU LATERAL ===== -->
+      <aside class="menu-lateral">
+        <div class="menu-logo">
+          <img src="logo.png" alt="Infinity Piercing" class="logo">
+          <div class="logo-texto">
+            <span class="logo-linha1">INFINITY</span>
+            <span class="logo-linha2">PIERCING</span>
+          </div>
         </div>
-      </div>
-      <div class="usuario-info">
-        <span id="usuario-nome"></span>
-        <span id="usuario-perfil" class="badge"></span>
-        <button class="btn-sair" onclick="sair()">Sair</button>
-      </div>
-    </header>
 
-    <main>
-      <!-- ===== CADASTRO DE USUÁRIOS (só o Admin vê) ===== -->
-      <section id="area-cadastro" class="card escondido">
-        <h2>👤 Cadastro de Usuários</h2>
-        <p class="sub">Adicione pessoas para elas poderem entrar no sistema</p>
+        <nav class="menu-itens">
+          <button class="menu-item ativo" onclick="mostrarAba('aba-feedbacks', this)">💬 Feedbacks</button>
+          <button class="menu-item" onclick="mostrarAba('aba-elogios', this)">🌟 Elogios</button>
+          <button class="menu-item" onclick="mostrarAba('aba-1on1', this)">🤝 Reuniões 1:1</button>
+          <button class="menu-item" onclick="mostrarAba('aba-okrs', this)">🎯 OKRs e Metas</button>
+          <button class="menu-item" onclick="mostrarAba('aba-avaliacao', this)">📊 Avaliação</button>
+          <button class="menu-item" onclick="mostrarAba('aba-cadastro', this)">👤 Cadastro</button>
+        </nav>
 
-        <form id="form-cadastro">
-          <label>Nome completo
-            <input type="text" id="c-nome" placeholder="Ex.: Maria Silva" required>
-          </label>
+        <div class="menu-usuario">
+          <span id="usuario-nome"></span>
+          <span id="usuario-perfil" class="badge"></span>
+          <button class="btn-sair" onclick="sair()">Sair</button>
+        </div>
+      </aside>
 
-          <label>Código de acesso
-            <input type="text" id="c-codigo" placeholder="Ex.: maria123" required>
-          </label>
+      <!-- ===== CONTEÚDO ===== -->
+      <main class="conteudo">
 
-          <label>Perfil
-            <select id="c-perfil">
-              <option value="Admin">Admin</option>
-              <option value="Lider">Líder</option>
-              <option value="Liderado">Liderado</option>
-            </select>
-          </label>
+        <!-- ABA FEEDBACKS -->
+        <section id="aba-feedbacks" class="aba">
+          <div class="card">
+            <h2>💬 Feedbacks</h2>
+            <p class="sub">Envie um feedback para alguém do time</p>
 
-          <button type="submit" class="btn-primario">Cadastrar usuário</button>
-        </form>
+            <form id="form-feedback">
+              <label>Para quem é o feedback?
+                <select id="f-para">
+                  <option value="">Selecione a pessoa...</option>
+                </select>
+              </label>
 
-        <h3 style="margin-top:20px;">Usuários cadastrados</h3>
-        <div id="lista-usuarios"></div>
-      </section>
+              <label>O que foi bom?
+                <textarea id="f-bom" placeholder="Ex.: Atendimento incrível com o cliente hoje!" required></textarea>
+              </label>
 
-      <!-- Mural de Elogios -->
-      <section class="card">
-        <h2>🌟 Mural de Elogios</h2>
-        <p class="sub">Reconheça o trabalho de alguém do time</p>
+              <label>O que pode melhorar?
+                <textarea id="f-melhorar" placeholder="Ex.: Poderia responder mais rápido no chat"></textarea>
+              </label>
 
-        <form id="form-elogio">
-          <label>Para quem é o elogio?
-            <select id="e-para">
-              <option value="">Selecione a pessoa...</option>
-            </select>
-          </label>
+              <button type="submit" class="btn-primario">Enviar feedback</button>
+            </form>
+          </div>
 
-          <label>O que você quer elogiar?
-            <textarea id="e-texto" placeholder="Ex.: Atendimento incrível com o cliente hoje!" required></textarea>
-          </label>
+          <div class="card">
+            <h2>📋 Feedbacks recebidos</h2>
+            <div id="lista-feedbacks"></div>
+          </div>
+        </section>
 
-          <button type="submit" class="btn-primario">Publicar elogio</button>
-        </form>
-      </section>
+        <!-- ABA ELOGIOS -->
+        <section id="aba-elogios" class="aba escondido">
+          <div class="card">
+            <h2>🌟 Mural de Elogios</h2>
+            <p class="sub">Reconheça o trabalho de alguém do time</p>
 
-      <!-- Lista de elogios -->
-      <section class="card">
-        <h2>📋 Elogios do time</h2>
-        <div id="lista-elogios"></div>
-      </section>
-    </main>
+            <form id="form-elogio">
+              <label>Para quem é o elogio?
+                <select id="e-para">
+                  <option value="">Selecione a pessoa...</option>
+                </select>
+              </label>
+
+              <label>O que você quer elogiar?
+                <textarea id="e-texto" placeholder="Ex.: Atendimento incrível com o cliente hoje!" required></textarea>
+              </label>
+
+              <button type="submit" class="btn-primario">Publicar elogio</button>
+            </form>
+          </div>
+
+          <div class="card">
+            <h2>📋 Elogios do time</h2>
+            <div id="lista-elogios"></div>
+          </div>
+        </section>
+
+        <!-- ABA 1:1 -->
+        <section id="aba-1on1" class="aba escondido">
+          <div class="card">
+            <h2>🤝 Reuniões 1:1</h2>
+            <p class="sub">Registre suas conversas individuais (em breve)</p>
+            <p>Este módulo será liberado na próxima fase.</p>
+          </div>
+        </section>
+
+        <!-- ABA OKRs -->
+        <section id="aba-okrs" class="aba escondido">
+          <div class="card">
+            <h2>🎯 OKRs e Metas</h2>
+            <p class="sub">Defina e acompanhe objetivos (em breve)</p>
+            <p>Este módulo será liberado na próxima fase.</p>
+          </div>
+        </section>
+
+        <!-- ABA AVALIAÇÃO -->
+        <section id="aba-avaliacao" class="aba escondido">
+          <div class="card">
+            <h2>📊 Avaliação de Desempenho</h2>
+            <p class="sub">Ciclos de avaliação (em breve)</p>
+            <p>Este módulo será liberado na próxima fase.</p>
+          </div>
+        </section>
+
+        <!-- ABA CADASTRO (só Admin vê) -->
+        <section id="aba-cadastro" class="aba escondido">
+          <div class="card">
+            <h2>👤 Cadastro de Usuários</h2>
+            <p class="sub">Adicione pessoas para elas poderem entrar no sistema</p>
+
+            <form id="form-cadastro">
+              <label>Nome completo
+                <input type="text" id="c-nome" placeholder="Ex.: Maria Silva" required>
+              </label>
+
+              <label>Código de acesso
+                <input type="text" id="c-codigo" placeholder="Ex.: maria123" required>
+              </label>
+
+              <label>Perfil
+                <select id="c-perfil">
+                  <option value="Admin">Admin</option>
+                  <option value="Lider">Líder</option>
+                  <option value="Liderado">Liderado</option>
+                </select>
+              </label>
+
+              <button type="submit" class="btn-primario">Cadastrar usuário</button>
+            </form>
+
+            <h3 style="margin-top:20px;">Usuários cadastrados</h3>
+            <div id="lista-usuarios"></div>
+          </div>
+        </section>
+
+      </main>
+    </div>
   </div>
 
   <script src="app.js"></script>
