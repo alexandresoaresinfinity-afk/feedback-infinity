@@ -168,17 +168,11 @@ body{font-family:Arial,Helvetica,sans-serif;background:#f5f0e8;color:#1a3c34;min
 </div>
 
 <script>
-// ===== URL DO GOOGLE APPS SCRIPT =====
-var API_URL = https://alexandresoaresinfinity-afk.github.io/feedback-infinity/;
-
-// ===== USUÁRIOS (guardados no navegador) =====
-function pegarUsuarios(){var d=localStorage.getItem("usuarios");return d?JSON.parse(d):{}}
-function salvarUsuarios(u){localStorage.setItem("usuarios",JSON.stringify(u))}
-
-function garantirAdmin(){
-  var u=pegarUsuarios();
-  if(Object.keys(u).length===0){u["Alexandre Soares"]={codigo:"admin123",perfil:"Admin"};salvarUsuarios(u);}
-}
+// ============================================================
+// COLE AQUI A URL DO SEU GOOGLE APPS SCRIPT (termina em /exec)
+// Ex.: https://script.google.com/macros/s/AKfycbxxxxx/exec
+// ============================================================
+var API_URL = "COLE_AQUI_A_URL_DO_SEU_APPS_SCRIPT";
 
 function mostrarAba(id,botao){
   var abas=document.querySelectorAll(".aba");
@@ -193,17 +187,26 @@ function fazerLogin(){
   var nome=document.getElementById("login-nome").value.trim();
   var codigo=document.getElementById("login-codigo").value.trim();
   var erro=document.getElementById("login-erro");
-  var usuarios=pegarUsuarios();
-  var usuario=usuarios[nome];
-  if(!usuario||usuario.codigo!==codigo){erro.textContent="Nome ou código incorretos. Tente novamente.";return;}
-  sessionStorage.setItem("usuario",JSON.stringify({nome:nome,perfil:usuario.perfil}));
+  if(!nome||!codigo){erro.textContent="Preencha nome e código.";return;}
+  erro.textContent="Verificando...";
+  fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({acao:"login",nome:nome,codigo:codigo})})
+    .then(function(r){return r.json();})
+    .then(function(res){
+      if(!res.ok){erro.textContent=res.erro||"Nome ou código incorretos.";return;}
+      sessionStorage.setItem("usuario",JSON.stringify({nome:res.nome,perfil:res.perfil}));
+      entrar(res.nome,res.perfil);
+    })
+    .catch(function(){erro.textContent="Falha de conexão. Confira se a URL do Apps Script está certa.";});
+}
+
+function entrar(nome,perfil){
   document.getElementById("tela-login").classList.add("escondido");
   document.getElementById("sistema").classList.remove("escondido");
   document.getElementById("usuario-nome").textContent=nome;
-  document.getElementById("usuario-perfil").textContent=usuario.perfil;
+  document.getElementById("usuario-perfil").textContent=perfil;
   var abaCad=document.getElementById("aba-cadastro");
   var botCad=document.querySelector('.menu-item[onclick*="aba-cadastro"]');
-  if(usuario.perfil==="Admin"){abaCad.classList.remove("escondido");botCad.style.display="block";mostrarUsuarios();}
+  if(perfil==="Admin"){abaCad.classList.remove("escondido");botCad.style.display="block";mostrarUsuarios();}
   else{abaCad.classList.add("escondido");botCad.style.display="none";}
   mostrarAba("aba-feedbacks",document.querySelector('.menu-item[onclick*="aba-feedbacks"]'));
   carregarPessoas();carregarElogios();carregarFeedbacks();
@@ -224,38 +227,48 @@ document.getElementById("form-cadastro").addEventListener("submit",function(e){
   var codigo=document.getElementById("c-codigo").value.trim();
   var perfil=document.getElementById("c-perfil").value;
   if(!nome||!codigo){alert("Preencha o nome e o código.");return;}
-  var usuarios=pegarUsuarios();
-  usuarios[nome]={codigo:codigo,perfil:perfil};
-  salvarUsuarios(usuarios);
-  document.getElementById("c-nome").value="";
-  document.getElementById("c-codigo").value="";
-  alert("Usuário cadastrado! ✅");
-  mostrarUsuarios();carregarPessoas();
+  fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({acao:"cadastrar_usuario",nome:nome,codigo:codigo,perfil:perfil})})
+    .then(function(r){return r.json();})
+    .then(function(res){
+      if(!res.ok){alert(res.erro||"Não foi possível cadastrar.");return;}
+      alert("Usuário cadastrado! ✅");
+      document.getElementById("c-nome").value="";
+      document.getElementById("c-codigo").value="";
+      carregarPessoas();mostrarUsuarios();
+    })
+    .catch(function(){alert("Falha de conexão.");});
 });
 
-function mostrarUsuarios(){
-  var lista=document.getElementById("lista-usuarios");
-  var usuarios=pegarUsuarios();
-  lista.innerHTML="";
-  Object.keys(usuarios).forEach(function(nome){
-    var div=document.createElement("div");
-    div.className="usuario-item";
-    div.innerHTML='<span class="usuario-nome">'+nome+'</span><span class="usuario-perfil">'+usuarios[nome].perfil+'</span>';
-    lista.appendChild(div);
-  });
+function carregarPessoas(){
+  fetch(API_URL+"?acao=listar_usuarios")
+    .then(function(r){return r.json();})
+    .then(function(dados){
+      var selF=document.getElementById("f-para");
+      var selE=document.getElementById("e-para");
+      selF.innerHTML='<option value="">Selecione a pessoa...</option>';
+      selE.innerHTML='<option value="">Selecione a pessoa...</option>';
+      dados.forEach(function(p){
+        var o1=document.createElement("option");o1.value=p.nome;o1.textContent=p.nome;selF.appendChild(o1);
+        var o2=document.createElement("option");o2.value=p.nome;o2.textContent=p.nome;selE.appendChild(o2);
+      });
+    })
+    .catch(function(){});
 }
 
-function carregarPessoas(){
-  var usuarios=pegarUsuarios();
-  var nomes=Object.keys(usuarios);
-  var selF=document.getElementById("f-para");
-  selF.innerHTML='<option value="">Selecione a pessoa...</option>';
-  var selE=document.getElementById("e-para");
-  selE.innerHTML='<option value="">Selecione a pessoa...</option>';
-  nomes.forEach(function(nome){
-    var o1=document.createElement("option");o1.value=nome;o1.textContent=nome;selF.appendChild(o1);
-    var o2=document.createElement("option");o2.value=nome;o2.textContent=nome;selE.appendChild(o2);
-  });
+function mostrarUsuarios(){
+  fetch(API_URL+"?acao=listar_usuarios")
+    .then(function(r){return r.json();})
+    .then(function(dados){
+      var lista=document.getElementById("lista-usuarios");
+      lista.innerHTML="";
+      dados.forEach(function(p){
+        var div=document.createElement("div");
+        div.className="usuario-item";
+        div.innerHTML='<span class="usuario-nome">'+p.nome+'</span><span class="usuario-perfil">'+p.perfil+'</span>';
+        lista.appendChild(div);
+      });
+    })
+    .catch(function(){});
 }
 
 document.getElementById("form-feedback").addEventListener("submit",function(e){
@@ -265,8 +278,7 @@ document.getElementById("form-feedback").addEventListener("submit",function(e){
   var bom=document.getElementById("f-bom").value.trim();
   var melhorar=document.getElementById("f-melhorar").value.trim();
   if(!para||!bom){alert("Preencha para quem e o que foi bom.");return;}
-  var dados={acao:"novo_feedback",de:usuario.nome,para:para,bom:bom,melhorar:melhorar,data:new Date().toLocaleString("pt-BR")};
-  fetch(API_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain"},body:JSON.stringify(dados)})
+  fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({acao:"novo_feedback",de:usuario.nome,para:para,bom:bom,melhorar:melhorar,data:new Date().toLocaleString("pt-BR")})})
     .then(function(){alert("Feedback enviado! ✅");document.getElementById("f-bom").value="";document.getElementById("f-melhorar").value="";carregarFeedbacks();})
     .catch(function(erro){alert("Falha de conexão. Detalhe: "+erro);});
 });
@@ -295,8 +307,7 @@ document.getElementById("form-elogio").addEventListener("submit",function(e){
   var para=document.getElementById("e-para").value;
   var texto=document.getElementById("e-texto").value.trim();
   if(!para||!texto){alert("Preencha para quem e o texto.");return;}
-  var dados={acao:"novo_elogio",de:usuario.nome,para:para,texto:texto,data:new Date().toLocaleString("pt-BR")};
-  fetch(API_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain"},body:JSON.stringify(dados)})
+  fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({acao:"novo_elogio",de:usuario.nome,para:para,texto:texto,data:new Date().toLocaleString("pt-BR")})})
     .then(function(){alert("Elogio publicado! 🌟");document.getElementById("e-texto").value="";carregarElogios();})
     .catch(function(erro){alert("Falha de conexão. Detalhe: "+erro);});
 });
@@ -318,8 +329,6 @@ function carregarElogios(){
     })
     .catch(function(){lista.innerHTML="<p>Não foi possível carregar os elogios.</p>";});
 }
-
-garantirAdmin();
 </script>
 </body>
 </html>
