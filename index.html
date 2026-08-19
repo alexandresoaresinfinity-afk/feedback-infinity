@@ -142,7 +142,7 @@ body{font-family:Arial,Helvetica,sans-serif;background:#f5f0e8;color:#1a3c34;min
         <div id="clima-form-area">
           <div class="card">
             <h2>🌡️ Termômetro de Clima</h2>
-            <p class="sub">Como está o seu dia? Responda em 1 minuto — só a liderança vê sua resposta.</p>
+            <p class="sub">Como está o seu dia? Responda em 1 minuto. Sua resposta fica visível apenas para a liderança (Admin e Líderes).</p>
             <p id="clima-ja-respondeu" class="escondido" style="background:#e8f0ec;border-radius:10px;padding:14px;margin-bottom:16px;">✅ Você já registrou o clima hoje. Volte amanhã! Se quiser corrigir, fale com a liderança.</p>
             <form id="form-clima">
               <label>Como está seu humor/energia hoje?
@@ -169,11 +169,16 @@ body{font-family:Arial,Helvetica,sans-serif;background:#f5f0e8;color:#1a3c34;min
               <button type="submit" class="btn-primario">Registrar clima de hoje</button>
             </form>
           </div>
+          <div class="card">
+            <h2>📋 Minhas respostas</h2>
+            <p class="sub">Seu histórico pessoal de clima — só você vê.</p>
+            <div id="clima-minhas-respostas"></div>
+          </div>
         </div>
         <div id="clima-painel" class="escondido">
           <div class="card">
             <h2>🌡️ Clima do time</h2>
-            <p class="sub">Respostas individuais — visível apenas para a liderança.</p>
+            <p class="sub">Respostas individuais — visível apenas para a liderança (Admin e Líderes).</p>
             <div id="clima-tabela"></div>
           </div>
         </div>
@@ -254,7 +259,7 @@ body{font-family:Arial,Helvetica,sans-serif;background:#f5f0e8;color:#1a3c34;min
 // COLE AQUI A URL DO SEU GOOGLE APPS SCRIPT (termina em /exec)
 // Ex.: https://script.google.com/macros/s/AKfycbxxxxx/exec
 // ============================================================
-var API_URL = "https://script.google.com/macros/s/AKfycbxUPP6gJrDTv1wPpb60NR9B2Gp4RHi3K7uuUvnF3seprRdRXy0FxqilLjJ2BgZay7NUzA/exec";
+var API_URL = "COLE_AQUI_A_URL_DO_SEU_APPS_SCRIPT";
 
 var usuarioAtual = null;
 var fotoPerfil = "";
@@ -574,7 +579,8 @@ document.getElementById("form-clima").addEventListener("submit",function(e){
 });
 
 function carregarClima(){
-  fetch(API_URL+"?acao=listar_clima")
+  var url=API_URL+"?acao=listar_clima&usuario="+encodeURIComponent(usuarioAtual.nome)+"&perfil="+encodeURIComponent(usuarioAtual.perfil);
+  fetch(url)
     .then(function(r){return r.json();})
     .then(function(dados){
       var areaForm=document.getElementById("clima-form-area");
@@ -602,6 +608,21 @@ function carregarClima(){
         var form=document.getElementById("form-clima");
         if(jaRespondeu){msg.classList.remove("escondido");form.classList.add("escondido");}
         else{msg.classList.add("escondido");form.classList.remove("escondido");}
+        var minhaLista=document.getElementById("clima-minhas-respostas");
+        minhaLista.innerHTML="";
+        if(dados&&dados.length>0){
+          var humores=["","😞","🙁","😐","🙂","😄"];
+          dados.forEach(function(c){
+            if(c.nome===usuarioAtual.nome){
+              var div=document.createElement("div");
+              div.className="feedback-item";
+              div.innerHTML='<div class="feedback-cabecalho"><span>'+c.data+'</span></div><div class="feedback-texto"><strong>Humor:</strong> '+humores[c.humor]+' ('+c.humor+'/5) &nbsp; <strong>Satisfação:</strong> '+humores[c.satisfacao]+' ('+c.satisfacao+'/5)</div>'+(c.comentario?'<div class="feedback-texto">💬 '+c.comentario+'</div>':"");
+              minhaLista.appendChild(div);
+            }
+          });
+        } else {
+          minhaLista.innerHTML="<p>Você ainda não registrou nenhuma resposta.</p>";
+        }
       }
     })
     .catch(function(){});
