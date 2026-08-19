@@ -1,5 +1,5 @@
 // ===== URL DO GOOGLE APPS SCRIPT =====
-const API_URL = "COLE_AQUI_A_URL_DO_SEU_APPS_SCRIPT";
+const API_URL = https://alexandresoaresinfinity-afk.github.io/feedback-infinity/;
 
 // ===== USUÁRIOS (guardados no navegador) =====
 function pegarUsuarios() {
