@@ -1,104 +1,152 @@
-:root {
-  --verde: #1b4332;      /* verde escuro floresta — cor principal */
-  --verde-claro: #2d6a4f;/* verde médio para hover/detalhes */
-  --preto: #0d0d0f;      /* preto para textos e contrastes */
-  --branco: #ffffff;     /* branco para fundos e cards */
-  --creme: #f7f6f2;      /* off-white/bege claro — fundo da página */
-}
-
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-  background: var(--creme);
-  color: var(--preto);
-  font-family: 'Inter', system-ui, sans-serif;
-  padding: 20px;
-  max-width: 800px;
-  margin: 0 auto;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #f5f0e8;
+  color: #1a3c34;
+  min-height: 100vh;
 }
 
-.topo { text-align: center; margin-bottom: 24px; }
-.topo h1 { color: var(--verde); font-size: 1.8rem; }
-.sub { color: var(--verde-claro); }
+.escondido { display: none !important; }
 
-.card {
-  background: var(--branco);
-  border: 1px solid #e0ddd5;
-  border-radius: 12px;
-  padding: 20px;
-  margin-bottom: 20px;
-  box-shadow: 0 4px 16px rgba(27, 67, 50, .08);
+.tela { padding: 20px; max-width: 720px; margin: 0 auto; }
+
+/* ===== LOGIN ===== */
+.card-login {
+  background: #fff;
+  border-radius: 16px;
+  padding: 32px;
+  margin-top: 60px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  text-align: center;
 }
-.card h2 { color: var(--verde); margin-bottom: 12px; }
 
-label { display: block; margin-bottom: 12px; font-size: .95rem; }
-input, select, textarea {
+.card-login .logo { width: 90px; height: auto; margin-bottom: 12px; }
+
+.card-login h1 { font-size: 1.6rem; margin-bottom: 4px; }
+
+.card-login .sub { color: #6b7a72; margin-bottom: 20px; }
+
+.card-login label {
+  display: block;
+  text-align: left;
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+
+.card-login input {
   width: 100%;
-  padding: 10px;
-  margin-top: 4px;
-  background: var(--branco);
-  color: var(--preto);
-  border: 1px solid #d5d2c9;
+  padding: 12px;
+  margin-top: 6px;
+  border: 1px solid #ccc;
   border-radius: 8px;
+  font-size: 1rem;
+}
+
+.erro { color: #c0392b; margin-top: 12px; font-weight: 600; }
+
+/* ===== TOPO ===== */
+.topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.logo-marca { display: flex; align-items: center; gap: 12px; }
+
+.logo-marca .logo { width: 56px; height: auto; }
+
+.logo-texto { display: flex; flex-direction: column; line-height: 1.05; }
+
+.logo-linha1, .logo-linha2 {
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #1a3c34;
+}
+
+.usuario-info { display: flex; align-items: center; gap: 10px; }
+
+.badge {
+  background: #1a3c34;
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+}
+
+.btn-sair {
+  background: transparent;
+  border: 1px solid #1a3c34;
+  color: #1a3c34;
+  padding: 6px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* ===== CARDS ===== */
+.card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+}
+
+.card h2 { margin-bottom: 6px; }
+
+.card .sub { color: #6b7a72; margin-bottom: 18px; }
+
+.card label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+
+.card input, .card select, .card textarea {
+  width: 100%;
+  padding: 12px;
+  margin-top: 6px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
   font-family: inherit;
 }
-textarea { min-height: 60px; resize: vertical; }
+
+.card textarea { min-height: 90px; resize: vertical; }
 
 .btn-primario {
-  background: var(--verde);
-  color: var(--branco);
-  font-weight: 700;
+  background: #1a3c34;
+  color: #fff;
   border: none;
-  border-radius: 8px;
-  padding: 12px 20px;
+  padding: 14px 20px;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 700;
   cursor: pointer;
   width: 100%;
 }
-.btn-primario:hover { background: var(--verde-claro); }
 
-.feedback-item { border-bottom: 1px solid #e0ddd5; padding: 12px 0; }
-.feedback-item:last-child { border-bottom: none; }
-.feedback-item strong { color: var(--verde); }
-.feedback-item .data { font-size: .8rem; color: #8a877e; }
-.logo {
-  width: 140px;
+.btn-primario:hover { background: #24564a; }
+
+/* ===== LISTA DE ELOGIOS ===== */
+.elogio {
+  border: 1px solid #e5ddd0;
+  border-radius: 12px;
+  padding: 16px;
   margin-bottom: 12px;
+  background: #faf7f1;
 }
-.topo {
-  text-align: center;
-  margin-bottom: 24px;
-}
-.logo-marca {
+
+.elogio .elogio-cabecalho {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  margin-bottom: 16px;
-}
-
-.logo {
-  width: 200px;
-  height: auto;
-  margin-bottom: 12px;
-}
-
-.logo-texto {
-  display: flex;
-  flex-direction: column;
-  text-align: left;
-  line-height: 1.05;
-}
-
-.logo-linha1 {
-  font-size: 1.5rem;
+  justify-content: space-between;
+  margin-bottom: 8px;
   font-weight: 700;
-  letter-spacing: 2px;
-  color: #1a3c34;
 }
 
-.logo-linha2 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  letter-spacing: 2px;
-  color: #1a3c34;
-}
+.elogio .elogio-data { color: #6b7a72; font-weight: 400; font-size: 0.85rem; }
+
+.elogio .elogio-texto { color: #333; }

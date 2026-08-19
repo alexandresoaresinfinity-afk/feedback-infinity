@@ -3,53 +3,76 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Infinity Piercing — Estúdio de Curadoria de Talentos</title>
+  <title>Infinity Piercing — Gestão de Desempenho</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header class="topo">
-  <img src="logo.png" alt="Infinity Piercing" class="logo">
-  <h1>Estúdio de Curadoria de Talentos</h1>
-  <p class="sub">Sistema de feedbacks — Infinity Piercing</p>
-</header>
-  <main>
-    <section class="card">
-      <h2>💬 Feedback Rápido</h2>
-      <form id="form-feedback">
-        <label>De (seu nome)
-          <input type="text" id="f-de" required>
-        </label>
-        <label>Para (nome da pessoa)
-          <input type="text" id="f-para" required>
-        </label>
-        <label>Competência
-          <select id="f-competencia">
-            <option>Qualidade e Excelência</option>
-            <option>Segurança e Cuidado</option>
-            <option>Confiança e Transparência</option>
-            <option>Curadoria e Atenção ao Detalhe</option>
-            <option>Relacionamento e Atendimento</option>
-            <option>Inovação e Design</option>
-          </select>
-        </label>
-        <label>O que foi bom
-          <textarea id="f-bom" required></textarea>
-        </label>
-        <label>O que pode melhorar
-          <textarea id="f-melhorar"></textarea>
-        </label>
-        <label>Sugestão
-          <textarea id="f-sugestao"></textarea>
-        </label>
-        <button type="submit" class="btn-primario">Enviar feedback</button>
-      </form>
-    </section>
 
-    <section class="card">
-      <h2>📋 Feed de Feedbacks</h2>
-      <div id="feed"></div>
-    </section>
-  </main>
+  <!-- ===== TELA DE LOGIN ===== -->
+  <div id="tela-login" class="tela">
+    <div class="card-login">
+      <img src="logo.png" alt="Infinity Piercing" class="logo">
+      <h1>Gestão de Desempenho</h1>
+      <p class="sub">Entre com seu nome e código de acesso</p>
+
+      <label>Seu nome
+        <input type="text" id="login-nome" placeholder="Ex.: Maria Silva">
+      </label>
+
+      <label>Código de acesso
+        <input type="password" id="login-codigo" placeholder="Código fornecido pelo Admin">
+      </label>
+
+      <button class="btn-primario" onclick="fazerLogin()">Entrar</button>
+      <p id="login-erro" class="erro"></p>
+    </div>
+  </div>
+
+  <!-- ===== SISTEMA (aparece depois do login) ===== -->
+  <div id="sistema" class="tela escondido">
+    <header class="topo">
+      <div class="logo-marca">
+        <img src="logo.png" alt="Infinity Piercing" class="logo">
+        <div class="logo-texto">
+          <span class="logo-linha1">INFINITY</span>
+          <span class="logo-linha2">PIERCING</span>
+        </div>
+      </div>
+      <div class="usuario-info">
+        <span id="usuario-nome"></span>
+        <span id="usuario-perfil" class="badge"></span>
+        <button class="btn-sair" onclick="sair()">Sair</button>
+      </div>
+    </header>
+
+    <main>
+      <!-- Mural de Elogios -->
+      <section class="card">
+        <h2>🌟 Mural de Elogios</h2>
+        <p class="sub">Reconheça o trabalho de alguém do time</p>
+
+        <form id="form-elogio">
+          <label>Para quem é o elogio?
+            <select id="e-para">
+              <option value="">Selecione a pessoa...</option>
+            </select>
+          </label>
+
+          <label>O que você quer elogiar?
+            <textarea id="e-texto" placeholder="Ex.: Atendimento incrível com o cliente hoje!" required></textarea>
+          </label>
+
+          <button type="submit" class="btn-primario">Publicar elogio</button>
+        </form>
+      </section>
+
+      <!-- Lista de elogios -->
+      <section class="card">
+        <h2>📋 Elogios do time</h2>
+        <div id="lista-elogios"></div>
+      </section>
+    </main>
+  </div>
 
   <script src="app.js"></script>
 </body>
