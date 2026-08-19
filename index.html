@@ -37,12 +37,17 @@ body{font-family:Arial,Helvetica,sans-serif;background:#f5f0e8;color:#1a3c34;min
 .card .sub{color:#6b7a72;margin-bottom:18px}
 .card label{display:block;font-weight:600;margin-bottom:14px}
 .card input,.card select,.card textarea{width:100%;padding:12px;margin-top:6px;border:1px solid #ccc;border-radius:8px;font-size:1rem;font-family:inherit}
-.card textarea{min-height:90px;resize:vertical}
+.card textarea{min-height:70px;resize:vertical}
 .btn-primario{background:#1a3c34;color:#fff;border:none;padding:14px 20px;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;width:100%}
 .btn-primario:hover{background:#24564a}
+.btn-pequeno{background:#1a3c34;color:#fff;border:none;padding:8px 14px;border-radius:8px;font-size:.85rem;font-weight:700;cursor:pointer;margin-left:6px}
+.btn-pequeno.vermelho{background:#c0392b}
 .usuario-item{display:flex;justify-content:space-between;align-items:center;border:1px solid #e5ddd0;border-radius:10px;padding:10px 14px;margin-bottom:8px;background:#faf7f1}
+.usuario-item .usuario-info{display:flex;align-items:center;gap:10px}
 .usuario-item .usuario-nome{font-weight:700}
 .usuario-item .usuario-perfil{background:#1a3c34;color:#fff;padding:3px 10px;border-radius:20px;font-size:.75rem}
+.foto-mini{width:36px;height:36px;border-radius:50%;object-fit:cover;background:#e5ddd0}
+.foto-grande{width:110px;height:110px;border-radius:50%;object-fit:cover;background:#e5ddd0;display:block;margin:0 auto 14px}
 .elogio,.feedback-item{border:1px solid #e5ddd0;border-radius:12px;padding:16px;margin-bottom:12px;background:#faf7f1}
 .elogio .elogio-cabecalho,.feedback-item .feedback-cabecalho{display:flex;justify-content:space-between;margin-bottom:8px;font-weight:700}
 .elogio .elogio-data,.feedback-item .feedback-data{color:#6b7a72;font-weight:400;font-size:.85rem}
@@ -80,7 +85,8 @@ body{font-family:Arial,Helvetica,sans-serif;background:#f5f0e8;color:#1a3c34;min
         <button class="menu-item" onclick="mostrarAba('aba-1on1',this)">🤝 Reuniões 1:1</button>
         <button class="menu-item" onclick="mostrarAba('aba-okrs',this)">🎯 OKRs e Metas</button>
         <button class="menu-item" onclick="mostrarAba('aba-avaliacao',this)">📊 Avaliação</button>
-        <button class="menu-item" onclick="mostrarAba('aba-cadastro',this)">👤 Cadastro</button>
+        <button class="menu-item" onclick="mostrarAba('aba-perfil',this)">👤 Meu Perfil</button>
+        <button class="menu-item" id="bot-cadastro" onclick="mostrarAba('aba-cadastro',this)">📋 Cadastro</button>
       </nav>
       <div class="menu-usuario">
         <span id="usuario-nome"></span>
@@ -139,10 +145,40 @@ body{font-family:Arial,Helvetica,sans-serif;background:#f5f0e8;color:#1a3c34;min
         <div class="card"><h2>📊 Avaliação de Desempenho</h2><p class="sub">Ciclos de avaliação (em breve)</p><p>Este módulo será liberado na próxima fase.</p></div>
       </section>
 
+      <section id="aba-perfil" class="aba escondido">
+        <div class="card">
+          <h2>👤 Meu Perfil</h2>
+          <p class="sub">Personalize suas informações — elas aparecem para o time</p>
+          <img id="perfil-foto-preview" class="foto-grande" src="" alt="Sua foto">
+          <label>Foto de perfil
+            <input type="file" id="perfil-foto" accept="image/*">
+          </label>
+          <label>Nome de exibição (apelido)
+            <input type="text" id="perfil-apelido" placeholder="Ex.: Alex">
+          </label>
+          <label>Cargo / função
+            <input type="text" id="perfil-cargo" placeholder="Ex.: Líder de CX">
+          </label>
+          <label>Bio / sobre mim
+            <textarea id="perfil-bio" placeholder="Conte um pouco sobre você..."></textarea>
+          </label>
+          <label>Endereço
+            <input type="text" id="perfil-endereco" placeholder="Ex.: Rua das Flores, 123">
+          </label>
+          <label>Telefones
+            <input type="text" id="perfil-telefones" placeholder="Ex.: (11) 99999-0000">
+          </label>
+          <label>E-mails
+            <input type="text" id="perfil-emails" placeholder="Ex.: alex@empresa.com">
+          </label>
+          <button class="btn-primario" onclick="salvarPerfil()">Salvar perfil</button>
+        </div>
+      </section>
+
       <section id="aba-cadastro" class="aba escondido">
         <div class="card">
-          <h2>👤 Cadastro de Usuários</h2>
-          <p class="sub">Adicione pessoas para elas poderem entrar no sistema</p>
+          <h2>📋 Cadastro de Usuários</h2>
+          <p class="sub">Adicione, edite ou exclua pessoas do sistema</p>
           <form id="form-cadastro">
             <label>Nome completo
               <input type="text" id="c-nome" placeholder="Ex.: Maria Silva" required>
@@ -172,7 +208,11 @@ body{font-family:Arial,Helvetica,sans-serif;background:#f5f0e8;color:#1a3c34;min
 // COLE AQUI A URL DO SEU GOOGLE APPS SCRIPT (termina em /exec)
 // Ex.: https://script.google.com/macros/s/AKfycbxxxxx/exec
 // ============================================================
-var API_URL = "https://script.google.com/macros/s/AKfycbwGNNShOWdoRZGiB0JwNpmXVHmZMwUoYKVofVxZIpqQir7vOkHGthM9dZdWypbMDHIfqA/exec"
+var API_URL = "https://script.google.com/macros/s/AKfycbwGNNShOWdoRZGiB0JwNpmXVHmZMwUoYKVofVxZIpqQir7vOkHGthM9dZdWypbMDHIfqA/exec";
+
+var usuarioAtual = null;
+var fotoPerfil = "";
+
 function mostrarAba(id,botao){
   var abas=document.querySelectorAll(".aba");
   for(var i=0;i<abas.length;i++){abas[i].classList.add("escondido");}
@@ -180,6 +220,8 @@ function mostrarAba(id,botao){
   var itens=document.querySelectorAll(".menu-item");
   for(var j=0;j<itens.length;j++){itens[j].classList.remove("ativo");}
   if(botao){botao.classList.add("ativo");}
+  if(id==="aba-perfil"){carregarPerfil();}
+  if(id==="aba-cadastro"){mostrarUsuarios();}
 }
 
 function fazerLogin(){
@@ -192,20 +234,22 @@ function fazerLogin(){
     .then(function(r){return r.json();})
     .then(function(res){
       if(!res.ok){erro.textContent=res.erro||"Nome ou código incorretos.";return;}
-      sessionStorage.setItem("usuario",JSON.stringify({nome:res.nome,perfil:res.perfil}));
-      entrar(res.nome,res.perfil);
+      usuarioAtual={nome:res.nome,perfil:res.perfil};
+      sessionStorage.setItem("usuario",JSON.stringify(usuarioAtual));
+      entrar();
     })
     .catch(function(){erro.textContent="Falha de conexão. Confira se a URL do Apps Script está certa.";});
 }
 
-function entrar(nome,perfil){
+function entrar(){
   document.getElementById("tela-login").classList.add("escondido");
   document.getElementById("sistema").classList.remove("escondido");
-  document.getElementById("usuario-nome").textContent=nome;
-  document.getElementById("usuario-perfil").textContent=perfil;
+  document.getElementById("usuario-nome").textContent=usuarioAtual.nome;
+  document.getElementById("usuario-perfil").textContent=usuarioAtual.perfil;
+  var podeGerir=(usuarioAtual.perfil==="Admin"||usuarioAtual.perfil==="Lider");
   var abaCad=document.getElementById("aba-cadastro");
-  var botCad=document.querySelector('.menu-item[onclick*="aba-cadastro"]');
-  if(perfil==="Admin"){abaCad.classList.remove("escondido");botCad.style.display="block";mostrarUsuarios();}
+  var botCad=document.getElementById("bot-cadastro");
+  if(podeGerir){abaCad.classList.remove("escondido");botCad.style.display="block";}
   else{abaCad.classList.add("escondido");botCad.style.display="none";}
   mostrarAba("aba-feedbacks",document.querySelector('.menu-item[onclick*="aba-feedbacks"]'));
   carregarPessoas();carregarElogios();carregarFeedbacks();
@@ -213,6 +257,7 @@ function entrar(nome,perfil){
 
 function sair(){
   sessionStorage.removeItem("usuario");
+  usuarioAtual=null;
   document.getElementById("sistema").classList.add("escondido");
   document.getElementById("tela-login").classList.remove("escondido");
   document.getElementById("login-nome").value="";
@@ -260,24 +305,110 @@ function mostrarUsuarios(){
     .then(function(dados){
       var lista=document.getElementById("lista-usuarios");
       lista.innerHTML="";
+      var podeGerir=(usuarioAtual.perfil==="Admin"||usuarioAtual.perfil==="Lider");
       dados.forEach(function(p){
         var div=document.createElement("div");
         div.className="usuario-item";
-        div.innerHTML='<span class="usuario-nome">'+p.nome+'</span><span class="usuario-perfil">'+p.perfil+'</span>';
+        var foto=p.foto?'<img class="foto-mini" src="'+p.foto+'" alt="">':'<div class="foto-mini"></div>';
+        var botoes="";
+        if(podeGerir){
+          botoes='<button class="btn-pequeno" onclick="editarUsuario(\''+p.nome.replace(/'/g,"\'")+'\')">Editar</button><button class="btn-pequeno vermelho" onclick="excluirUsuario(\''+p.nome.replace(/'/g,"\'")+'\')">Excluir</button>';
+        }
+        div.innerHTML='<div class="usuario-info">'+foto+'<span class="usuario-nome">'+p.nome+'</span><span class="usuario-perfil">'+p.perfil+'</span></div><div>'+botoes+'</div>';
         lista.appendChild(div);
       });
     })
     .catch(function(){});
 }
 
+function editarUsuario(nomeAntigo){
+  var novoNome=prompt("Nome completo:",nomeAntigo);
+  if(novoNome===null)return;
+  var novoCodigo=prompt("Código de acesso:");
+  if(novoCodigo===null)return;
+  var novoPerfil=prompt("Perfil (Admin, Lider ou Liderado):");
+  if(novoPerfil===null)return;
+  if(!novoNome||!novoCodigo||!novoPerfil){alert("Preencha todos os campos.");return;}
+  fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({acao:"editar_usuario",solicitante_perfil:usuarioAtual.perfil,nome_antigo:nomeAntigo,nome:novoNome,codigo:novoCodigo,perfil:novoPerfil})})
+    .then(function(r){return r.json();})
+    .then(function(res){
+      if(!res.ok){alert(res.erro||"Não foi possível editar.");return;}
+      alert("Usuário editado! ✅");
+      carregarPessoas();mostrarUsuarios();
+    })
+    .catch(function(){alert("Falha de conexão.");});
+}
+
+function excluirUsuario(nome){
+  if(!confirm("Excluir o usuário "+nome+"? Essa ação não pode ser desfeita."))return;
+  fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({acao:"excluir_usuario",solicitante_perfil:usuarioAtual.perfil,nome:nome})})
+    .then(function(r){return r.json();})
+    .then(function(res){
+      if(!res.ok){alert(res.erro||"Não foi possível excluir.");return;}
+      alert("Usuário excluído.");
+      carregarPessoas();mostrarUsuarios();
+    })
+    .catch(function(){alert("Falha de conexão.");});
+}
+
+document.getElementById("perfil-foto").addEventListener("change",function(e){
+  var arquivo=e.target.files[0];
+  if(!arquivo)return;
+  var leitor=new FileReader();
+  leitor.onload=function(ev){
+    fotoPerfil=ev.target.result;
+    document.getElementById("perfil-foto-preview").src=fotoPerfil;
+  };
+  leitor.readAsDataURL(arquivo);
+});
+
+function carregarPerfil(){
+  fetch(API_URL+"?acao=listar_usuarios")
+    .then(function(r){return r.json();})
+    .then(function(dados){
+      var eu=null;
+      dados.forEach(function(p){if(p.nome===usuarioAtual.nome)eu=p;});
+      if(!eu)return;
+      document.getElementById("perfil-apelido").value=eu.apelido||"";
+      document.getElementById("perfil-cargo").value=eu.cargo||"";
+      document.getElementById("perfil-bio").value=eu.bio||"";
+      document.getElementById("perfil-endereco").value=eu.endereco||"";
+      document.getElementById("perfil-telefones").value=eu.telefones||"";
+      document.getElementById("perfil-emails").value=eu.emails||"";
+      fotoPerfil=eu.foto||"";
+      document.getElementById("perfil-foto-preview").src=fotoPerfil||"";
+    })
+    .catch(function(){});
+}
+
+function salvarPerfil(){
+  var dados={
+    acao:"atualizar_perfil",
+    nome:usuarioAtual.nome,
+    apelido:document.getElementById("perfil-apelido").value.trim(),
+    cargo:document.getElementById("perfil-cargo").value.trim(),
+    bio:document.getElementById("perfil-bio").value.trim(),
+    endereco:document.getElementById("perfil-endereco").value.trim(),
+    telefones:document.getElementById("perfil-telefones").value.trim(),
+    emails:document.getElementById("perfil-emails").value.trim(),
+    foto:fotoPerfil
+  };
+  fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify(dados)})
+    .then(function(r){return r.json();})
+    .then(function(res){
+      if(!res.ok){alert(res.erro||"Não foi possível salvar.");return;}
+      alert("Perfil salvo! ✅");
+    })
+    .catch(function(){alert("Falha de conexão.");});
+}
+
 document.getElementById("form-feedback").addEventListener("submit",function(e){
   e.preventDefault();
-  var usuario=JSON.parse(sessionStorage.getItem("usuario"));
   var para=document.getElementById("f-para").value;
   var bom=document.getElementById("f-bom").value.trim();
   var melhorar=document.getElementById("f-melhorar").value.trim();
   if(!para||!bom){alert("Preencha para quem e o que foi bom.");return;}
-  fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({acao:"novo_feedback",de:usuario.nome,para:para,bom:bom,melhorar:melhorar,data:new Date().toLocaleString("pt-BR")})})
+  fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({acao:"novo_feedback",de:usuarioAtual.nome,para:para,bom:bom,melhorar:melhorar,data:new Date().toLocaleString("pt-BR")})})
     .then(function(){alert("Feedback enviado! ✅");document.getElementById("f-bom").value="";document.getElementById("f-melhorar").value="";carregarFeedbacks();})
     .catch(function(erro){alert("Falha de conexão. Detalhe: "+erro);});
 });
@@ -302,11 +433,10 @@ function carregarFeedbacks(){
 
 document.getElementById("form-elogio").addEventListener("submit",function(e){
   e.preventDefault();
-  var usuario=JSON.parse(sessionStorage.getItem("usuario"));
   var para=document.getElementById("e-para").value;
   var texto=document.getElementById("e-texto").value.trim();
   if(!para||!texto){alert("Preencha para quem e o texto.");return;}
-  fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({acao:"novo_elogio",de:usuario.nome,para:para,texto:texto,data:new Date().toLocaleString("pt-BR")})})
+  fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({acao:"novo_elogio",de:usuarioAtual.nome,para:para,texto:texto,data:new Date().toLocaleString("pt-BR")})})
     .then(function(){alert("Elogio publicado! 🌟");document.getElementById("e-texto").value="";carregarElogios();})
     .catch(function(erro){alert("Falha de conexão. Detalhe: "+erro);});
 });
