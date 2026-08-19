@@ -131,6 +131,28 @@ body {
 
 .btn-primario:hover { background: #24564a; }
 
+/* ===== LISTA DE USUÁRIOS ===== */
+.usuario-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #e5ddd0;
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 8px;
+  background: #faf7f1;
+}
+
+.usuario-item .usuario-nome { font-weight: 700; }
+
+.usuario-item .usuario-perfil {
+  background: #1a3c34;
+  color: #fff;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+}
+
 /* ===== LISTA DE ELOGIOS ===== */
 .elogio {
   border: 1px solid #e5ddd0;

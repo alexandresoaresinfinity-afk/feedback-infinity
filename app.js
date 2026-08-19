@@ -1,19 +1,15 @@
-// ===== CONFIGURAÇÃO =====
-// AQUI o Admin define quem pode entrar e com qual perfil.
-// Formato: nome -> { codigo, perfil }
-// Perfis: "Admin", "Lider", "Liderado"
-const USUARIOS = {
-  "Alexandre Soares": { codigo: "admin123", perfil: "Admin" },
-  "Tamires Santana":      { codigo: "lider123", perfil: "Lider" },
-  "Vinicius Monteiro":      { codigo: "liderado123", perfil: "Liderado" }
-  "Larissa Farias":      { codigo: "liderado123", perfil: "Liderado" }
-  "Andrei":      { codigo: "liderado123", perfil: "Liderado" }
-
-};
-
 // ===== URL DO GOOGLE APPS SCRIPT (onde os elogios são salvos) =====
-// Troque pela URL do seu Web App (a que termina em /exec)
 const API_URL = https://script.google.com/macros/s/AKfycbwGNNShOWdoRZGiB0JwNpmXVHmZMwUoYKVofVxZIpqQir7vOkHGthM9dZdWypbMDHIfqA/exec;
+
+// ===== GERENCIAR USUÁRIOS (guardados no navegador) =====
+function pegarUsuarios() {
+  const dados = localStorage.getItem("usuarios");
+  return dados ? JSON.parse(dados) : {};
+}
+
+function salvarUsuarios(usuarios) {
+  localStorage.setItem("usuarios", JSON.stringify(usuarios));
+}
 
 // ===== LOGIN =====
 function fazerLogin() {
@@ -21,22 +17,26 @@ function fazerLogin() {
   const codigo = document.getElementById("login-codigo").value.trim();
   const erro = document.getElementById("login-erro");
 
-  const usuario = USUARIOS[nome];
+  const usuarios = pegarUsuarios();
+  const usuario = usuarios[nome];
 
   if (!usuario || usuario.codigo !== codigo) {
     erro.textContent = "Nome ou código incorretos. Tente novamente.";
     return;
   }
 
-  // Guarda quem está logado
   sessionStorage.setItem("usuario", JSON.stringify({ nome, perfil: usuario.perfil }));
 
-  // Mostra o sistema
   document.getElementById("tela-login").classList.add("escondido");
   document.getElementById("sistema").classList.remove("escondido");
 
   document.getElementById("usuario-nome").textContent = nome;
   document.getElementById("usuario-perfil").textContent = usuario.perfil;
+
+  // Só o Admin vê a área de cadastro
+  if (usuario.perfil === "Admin") {
+    document.getElementById("area-cadastro").classList.remove("escondido");
+  }
 
   carregarPessoas();
   carregarElogios();
@@ -51,13 +51,54 @@ function sair() {
   document.getElementById("login-erro").textContent = "";
 }
 
+// ===== CADASTRO DE USUÁRIOS =====
+document.getElementById("form-cadastro").addEventListener("submit", function (e) {
+  e.preventDefault();
+
+  const nome = document.getElementById("c-nome").value.trim();
+  const codigo = document.getElementById("c-codigo").value.trim();
+  const perfil = document.getElementById("c-perfil").value;
+
+  if (!nome || !codigo) {
+    alert("Preencha o nome e o código de acesso.");
+    return;
+  }
+
+  const usuarios = pegarUsuarios();
+  usuarios[nome] = { codigo, perfil };
+  salvarUsuarios(usuarios);
+
+  document.getElementById("c-nome").value = "";
+  document.getElementById("c-codigo").value = "";
+
+  alert("Usuário cadastrado com sucesso! ✅");
+  mostrarUsuarios();
+  carregarPessoas();
+});
+
+function mostrarUsuarios() {
+  const lista = document.getElementById("lista-usuarios");
+  const usuarios = pegarUsuarios();
+  lista.innerHTML = "";
+
+  Object.keys(usuarios).forEach(nome => {
+    const div = document.createElement("div");
+    div.className = "usuario-item";
+    div.innerHTML = `
+      <span class="usuario-nome">${nome}</span>
+      <span class="usuario-perfil">${usuarios[nome].perfil}</span>
+    `;
+    lista.appendChild(div);
+  });
+}
+
 // ===== CARREGAR PESSOAS NO SELECT =====
 function carregarPessoas() {
   const select = document.getElementById("e-para");
   select.innerHTML = '<option value="">Selecione a pessoa...</option>';
 
-  const nomes = Object.keys(USUARIOS);
-  nomes.forEach(nome => {
+  const usuarios = pegarUsuarios();
+  Object.keys(usuarios).forEach(nome => {
     const opt = document.createElement("option");
     opt.value = nome;
     opt.textContent = nome;
@@ -87,7 +128,7 @@ document.getElementById("form-elogio").addEventListener("submit", async function
   };
 
   try {
-    const resposta = await fetch(API_URL, {
+    await fetch(API_URL, {
       method: "POST",
       mode: "no-cors",
       headers: { "Content-Type": "text/plain" },

@@ -46,6 +46,35 @@
     </header>
 
     <main>
+      <!-- ===== CADASTRO DE USUÁRIOS (só o Admin vê) ===== -->
+      <section id="area-cadastro" class="card escondido">
+        <h2>👤 Cadastro de Usuários</h2>
+        <p class="sub">Adicione pessoas para elas poderem entrar no sistema</p>
+
+        <form id="form-cadastro">
+          <label>Nome completo
+            <input type="text" id="c-nome" placeholder="Ex.: Maria Silva" required>
+          </label>
+
+          <label>Código de acesso
+            <input type="text" id="c-codigo" placeholder="Ex.: maria123" required>
+          </label>
+
+          <label>Perfil
+            <select id="c-perfil">
+              <option value="Admin">Admin</option>
+              <option value="Lider">Líder</option>
+              <option value="Liderado">Liderado</option>
+            </select>
+          </label>
+
+          <button type="submit" class="btn-primario">Cadastrar usuário</button>
+        </form>
+
+        <h3 style="margin-top:20px;">Usuários cadastrados</h3>
+        <div id="lista-usuarios"></div>
+      </section>
+
       <!-- Mural de Elogios -->
       <section class="card">
         <h2>🌟 Mural de Elogios</h2>
