@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Infinity Piercing — Estúdio de Curadoria de Talentos</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topo">
+  <img src="logo.png" alt="Infinity Piercing" class="logo">
+  <h1>Estúdio de Curadoria de Talentos</h1>
+  <p class="sub">Sistema de feedbacks — Infinity Piercing</p>
+</header>
+  <main>
+    <section class="card">
+      <h2>💬 Feedback Rápido</h2>
+      <form id="form-feedback">
+        <label>De (seu nome)
+          <input type="text" id="f-de" required>
+        </label>
+        <label>Para (nome da pessoa)
+          <input type="text" id="f-para" required>
+        </label>
+        <label>Competência
+          <select id="f-competencia">
+            <option>Qualidade e Excelência</option>
+            <option>Segurança e Cuidado</option>
+            <option>Confiança e Transparência</option>
+            <option>Curadoria e Atenção ao Detalhe</option>
+            <option>Relacionamento e Atendimento</option>
+            <option>Inovação e Design</option>
+          </select>
+        </label>
+        <label>O que foi bom
+          <textarea id="f-bom" required></textarea>
+        </label>
+        <label>O que pode melhorar
+          <textarea id="f-melhorar"></textarea>
+        </label>
+        <label>Sugestão
+          <textarea id="f-sugestao"></textarea>
+        </label>
+        <button type="submit" class="btn-primario">Enviar feedback</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>📋 Feed de Feedbacks</h2>
+      <div id="feed"></div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
