@@ -1,5 +1,5 @@
 // ===== URL DO GOOGLE APPS SCRIPT (onde os elogios são salvos) =====
-const API_URL = https://script.google.com/macros/s/AKfycbwGNNShOWdoRZGiB0JwNpmXVHmZMwUoYKVofVxZIpqQir7vOkHGthM9dZdWypbMDHIfqA/exec;
+const API_URL = alexandresoaresinfinity-afk.github.io/feedback-infinity;
 
 // ===== GERENCIAR USUÁRIOS (guardados no navegador) =====
 function pegarUsuarios() {
