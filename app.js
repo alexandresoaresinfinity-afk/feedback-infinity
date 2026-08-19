@@ -1,7 +1,7 @@
-// ===== URL DO GOOGLE APPS SCRIPT (onde os elogios são salvos) =====
-const API_URL = alexandresoaresinfinity-afk.github.io/feedback-infinity;
+// ===== URL DO GOOGLE APPS SCRIPT =====
+const API_URL = "COLE_AQUI_A_URL_DO_SEU_APPS_SCRIPT";
 
-// ===== GERENCIAR USUÁRIOS (guardados no navegador) =====
+// ===== USUÁRIOS (guardados no navegador) =====
 function pegarUsuarios() {
   const dados = localStorage.getItem("usuarios");
   return dados ? JSON.parse(dados) : {};
@@ -9,6 +9,15 @@ function pegarUsuarios() {
 
 function salvarUsuarios(usuarios) {
   localStorage.setItem("usuarios", JSON.stringify(usuarios));
+}
+
+// Cria o Admin padrão na primeira vez (sem precisar do console)
+function garantirAdmin() {
+  const usuarios = pegarUsuarios();
+  if (Object.keys(usuarios).length === 0) {
+    usuarios["Alexandre Soares"] = { codigo: "admin123", perfil: "Admin" };
+    salvarUsuarios(usuarios);
+  }
 }
 
 // ===== LOGIN =====
@@ -33,9 +42,9 @@ function fazerLogin() {
   document.getElementById("usuario-nome").textContent = nome;
   document.getElementById("usuario-perfil").textContent = usuario.perfil;
 
-  // Só o Admin vê a área de cadastro
   if (usuario.perfil === "Admin") {
     document.getElementById("area-cadastro").classList.remove("escondido");
+    mostrarUsuarios();
   }
 
   carregarPessoas();
@@ -54,24 +63,16 @@ function sair() {
 // ===== CADASTRO DE USUÁRIOS =====
 document.getElementById("form-cadastro").addEventListener("submit", function (e) {
   e.preventDefault();
-
   const nome = document.getElementById("c-nome").value.trim();
   const codigo = document.getElementById("c-codigo").value.trim();
   const perfil = document.getElementById("c-perfil").value;
-
-  if (!nome || !codigo) {
-    alert("Preencha o nome e o código de acesso.");
-    return;
-  }
-
+  if (!nome || !codigo) { alert("Preencha o nome e o código."); return; }
   const usuarios = pegarUsuarios();
   usuarios[nome] = { codigo, perfil };
   salvarUsuarios(usuarios);
-
   document.getElementById("c-nome").value = "";
   document.getElementById("c-codigo").value = "";
-
-  alert("Usuário cadastrado com sucesso! ✅");
+  alert("Usuário cadastrado! ✅");
   mostrarUsuarios();
   carregarPessoas();
 });
@@ -80,23 +81,17 @@ function mostrarUsuarios() {
   const lista = document.getElementById("lista-usuarios");
   const usuarios = pegarUsuarios();
   lista.innerHTML = "";
-
   Object.keys(usuarios).forEach(nome => {
     const div = document.createElement("div");
     div.className = "usuario-item";
-    div.innerHTML = `
-      <span class="usuario-nome">${nome}</span>
-      <span class="usuario-perfil">${usuarios[nome].perfil}</span>
-    `;
+    div.innerHTML = `<span class="usuario-nome">${nome}</span><span class="usuario-perfil">${usuarios[nome].perfil}</span>`;
     lista.appendChild(div);
   });
 }
 
-// ===== CARREGAR PESSOAS NO SELECT =====
 function carregarPessoas() {
   const select = document.getElementById("e-para");
   select.innerHTML = '<option value="">Selecione a pessoa...</option>';
-
   const usuarios = pegarUsuarios();
   Object.keys(usuarios).forEach(nome => {
     const opt = document.createElement("option");
@@ -106,35 +101,17 @@ function carregarPessoas() {
   });
 }
 
-// ===== ENVIAR ELOGIO =====
+// ===== ELOGIO =====
 document.getElementById("form-elogio").addEventListener("submit", async function (e) {
   e.preventDefault();
-
   const usuario = JSON.parse(sessionStorage.getItem("usuario"));
   const para = document.getElementById("e-para").value;
   const texto = document.getElementById("e-texto").value.trim();
-
-  if (!para || !texto) {
-    alert("Preencha para quem é o elogio e o texto.");
-    return;
-  }
-
-  const dados = {
-    acao: "novo_elogio",
-    de: usuario.nome,
-    para: para,
-    texto: texto,
-    data: new Date().toLocaleString("pt-BR")
-  };
-
+  if (!para || !texto) { alert("Preencha para quem e o texto."); return; }
+  const dados = { acao: "novo_elogio", de: usuario.nome, para, texto, data: new Date().toLocaleString("pt-BR") };
   try {
-    await fetch(API_URL, {
-      method: "POST",
-      mode: "no-cors",
-      headers: { "Content-Type": "text/plain" },
-      body: JSON.stringify(dados)
-    });
-    alert("Elogio publicado com sucesso! 🌟");
+    await fetch(API_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(dados) });
+    alert("Elogio publicado! 🌟");
     document.getElementById("e-texto").value = "";
     carregarElogios();
   } catch (erro) {
@@ -142,34 +119,24 @@ document.getElementById("form-elogio").addEventListener("submit", async function
   }
 });
 
-// ===== CARREGAR ELOGIOS =====
 async function carregarElogios() {
   const lista = document.getElementById("lista-elogios");
   lista.innerHTML = "<p>Carregando elogios...</p>";
-
   try {
     const resposta = await fetch(API_URL + "?acao=listar_elogios");
     const dados = await resposta.json();
     lista.innerHTML = "";
-
-    if (!dados || dados.length === 0) {
-      lista.innerHTML = "<p>Ainda não há elogios. Seja o primeiro! 🌟</p>";
-      return;
-    }
-
+    if (!dados || dados.length === 0) { lista.innerHTML = "<p>Ainda não há elogios. Seja o primeiro! 🌟</p>"; return; }
     dados.forEach(el => {
       const div = document.createElement("div");
       div.className = "elogio";
-      div.innerHTML = `
-        <div class="elogio-cabecalho">
-          <span>${el.de} → ${el.para}</span>
-          <span class="elogio-data">${el.data}</span>
-        </div>
-        <div class="elogio-texto">${el.texto}</div>
-      `;
+      div.innerHTML = `<div class="elogio-cabecalho"><span>${el.de} → ${el.para}</span><span class="elogio-data">${el.data}</span></div><div class="elogio-texto">${el.texto}</div>`;
       lista.appendChild(div);
     });
   } catch (erro) {
     lista.innerHTML = "<p>Não foi possível carregar os elogios.</p>";
   }
 }
+
+// ===== INICIO =====
+garantirAdmin();
