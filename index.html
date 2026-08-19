@@ -52,6 +52,7 @@ body{font-family:Arial,Helvetica,sans-serif;background:#f5f0e8;color:#1a3c34;min
 .elogio .elogio-cabecalho,.feedback-item .feedback-cabecalho{display:flex;justify-content:space-between;margin-bottom:8px;font-weight:700}
 .elogio .elogio-data,.feedback-item .feedback-data{color:#6b7a72;font-weight:400;font-size:.85rem}
 .elogio .elogio-texto,.feedback-item .feedback-texto{color:#333}
+.feedback-acoes{margin-top:10px;text-align:right}
 .clima-nota{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
 .clima-nota button{flex:1;min-width:50px;padding:10px;border:2px solid #ddd;border-radius:10px;background:#fff;font-size:1.3rem;cursor:pointer}
 .clima-nota button.selecionado{border-color:#1a3c34;background:#e8f0ec}
@@ -262,6 +263,7 @@ var notaSatisfacao = 0;
 
 function hojeBR(){var d=new Date();return d.getDate()+"/"+("0"+(d.getMonth()+1)).slice(-2)+"/"+d.getFullYear();}
 function ehLideranca(){return usuarioAtual&&(usuarioAtual.perfil==="Admin"||usuarioAtual.perfil==="Lider");}
+function ehAdmin(){return usuarioAtual&&usuarioAtual.perfil==="Admin";}
 
 function mostrarAba(id,botao){
   var abas=document.querySelectorAll(".aba");
@@ -485,11 +487,48 @@ function carregarFeedbacks(){
       dados.forEach(function(fb){
         var div=document.createElement("div");
         div.className="feedback-item";
-        div.innerHTML='<div class="feedback-cabecalho"><span>'+fb.de+' → '+fb.para+'</span><span class="feedback-data">'+fb.data+'</span></div><div class="feedback-texto"><strong>Bom:</strong> '+fb.bom+'</div>'+(fb.melhorar?'<div class="feedback-texto"><strong>Melhorar:</strong> '+fb.melhorar+'</div>':"");
+        var editado=fb.editadoEm?'<div class="feedback-texto" style="color:#6b7a72;font-size:.8rem;margin-top:6px;">✏️ Editado em: '+fb.editadoEm+'</div>':"";
+        var acoes="";
+        if(ehLideranca()){
+          acoes='<div class="feedback-acoes"><button class="btn-pequeno" onclick="editarFeedback(\''+fb.data.replace(/'/g,"\'")+'\',\''+fb.de.replace(/'/g,"\'")+'\',\''+fb.para.replace(/'/g,"\'")+'\')">Editar</button>';
+          if(ehAdmin()){
+            acoes+='<button class="btn-pequeno vermelho" onclick="excluirFeedback(\''+fb.data.replace(/'/g,"\'")+'\',\''+fb.de.replace(/'/g,"\'")+'\',\''+fb.para.replace(/'/g,"\'")+'\')">Excluir</button>';
+          }
+          acoes+='</div>';
+        }
+        div.innerHTML='<div class="feedback-cabecalho"><span>'+fb.de+' → '+fb.para+'</span><span class="feedback-data">'+fb.data+'</span></div><div class="feedback-texto"><strong>Bom:</strong> '+fb.bom+'</div>'+(fb.melhorar?'<div class="feedback-texto"><strong>Melhorar:</strong> '+fb.melhorar+'</div>':"")+editado+acoes;
         lista.appendChild(div);
       });
     })
     .catch(function(){lista.innerHTML="<p>Não foi possível carregar os feedbacks.</p>";});
+}
+
+function editarFeedback(data,de,para){
+  var novoBom=prompt("O que foi bom?");
+  if(novoBom===null)return;
+  var novoMelhorar=prompt("O que pode melhorar?");
+  if(novoMelhorar===null)return;
+  if(!novoBom){alert("Preencha o campo 'o que foi bom'.");return;}
+  fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({acao:"editar_feedback",solicitante_perfil:usuarioAtual.perfil,data:data,de:de,para:para,bom:novoBom,melhorar:novoMelhorar})})
+    .then(function(r){return r.json();})
+    .then(function(res){
+      if(!res.ok){alert(res.erro||"Não foi possível editar.");return;}
+      alert("Feedback editado! ✅");
+      carregarFeedbacks();
+    })
+    .catch(function(){alert("Falha de conexão.");});
+}
+
+function excluirFeedback(data,de,para){
+  if(!confirm("Excluir este feedback? Essa ação não pode ser desfeita."))return;
+  fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({acao:"excluir_feedback",solicitante_perfil:usuarioAtual.perfil,data:data,de:de,para:para})})
+    .then(function(r){return r.json();})
+    .then(function(res){
+      if(!res.ok){alert(res.erro||"Não foi possível excluir.");return;}
+      alert("Feedback excluído.");
+      carregarFeedbacks();
+    })
+    .catch(function(){alert("Falha de conexão.");});
 }
 
 document.getElementById("form-elogio").addEventListener("submit",function(e){
