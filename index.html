@@ -585,44 +585,49 @@ function carregarClima(){
     .then(function(dados){
       var areaForm=document.getElementById("clima-form-area");
       var areaPainel=document.getElementById("clima-painel");
+      // TODOS veem o formulário de resposta
+      areaForm.classList.remove("escondido");
+      // A liderança vê também o painel do time
       if(ehLideranca()){
-        areaForm.classList.add("escondido");
         areaPainel.classList.remove("escondido");
         var tabela=document.getElementById("clima-tabela");
         tabela.innerHTML="";
-        if(!dados||dados.length===0){tabela.innerHTML="<p>Ainda não há respostas de clima.</p>";return;}
-        var humores=["","😞","🙁","😐","🙂","😄"];
-        dados.forEach(function(c){
-          var div=document.createElement("div");
-          div.className="feedback-item";
-          div.innerHTML='<div class="feedback-cabecalho"><span>'+c.nome+'</span><span class="feedback-data">'+c.data+'</span></div><div class="feedback-texto"><strong>Humor:</strong> '+humores[c.humor]+' ('+c.humor+'/5) &nbsp; <strong>Satisfação:</strong> '+humores[c.satisfacao]+' ('+c.satisfacao+'/5)</div>'+(c.comentario?'<div class="feedback-texto">💬 '+c.comentario+'</div>':"");
-          tabela.appendChild(div);
-        });
-      } else {
-        areaForm.classList.remove("escondido");
-        areaPainel.classList.add("escondido");
-        var hoje=hojeBR();
-        var jaRespondeu=false;
-        dados.forEach(function(c){if(c.nome===usuarioAtual.nome&&c.data===hoje)jaRespondeu=true;});
-        var msg=document.getElementById("clima-ja-respondeu");
-        var form=document.getElementById("form-clima");
-        if(jaRespondeu){msg.classList.remove("escondido");form.classList.add("escondido");}
-        else{msg.classList.add("escondido");form.classList.remove("escondido");}
-        var minhaLista=document.getElementById("clima-minhas-respostas");
-        minhaLista.innerHTML="";
-        if(dados&&dados.length>0){
+        if(!dados||dados.length===0){tabela.innerHTML="<p>Ainda não há respostas de clima.</p>";}
+        else{
           var humores=["","😞","🙁","😐","🙂","😄"];
           dados.forEach(function(c){
-            if(c.nome===usuarioAtual.nome){
-              var div=document.createElement("div");
-              div.className="feedback-item";
-              div.innerHTML='<div class="feedback-cabecalho"><span>'+c.data+'</span></div><div class="feedback-texto"><strong>Humor:</strong> '+humores[c.humor]+' ('+c.humor+'/5) &nbsp; <strong>Satisfação:</strong> '+humores[c.satisfacao]+' ('+c.satisfacao+'/5)</div>'+(c.comentario?'<div class="feedback-texto">💬 '+c.comentario+'</div>':"");
-              minhaLista.appendChild(div);
-            }
+            var div=document.createElement("div");
+            div.className="feedback-item";
+            div.innerHTML='<div class="feedback-cabecalho"><span>'+c.nome+'</span><span class="feedback-data">'+c.data+'</span></div><div class="feedback-texto"><strong>Humor:</strong> '+humores[c.humor]+' ('+c.humor+'/5) &nbsp; <strong>Satisfação:</strong> '+humores[c.satisfacao]+' ('+c.satisfacao+'/5)</div>'+(c.comentario?'<div class="feedback-texto">💬 '+c.comentario+'</div>':"");
+            tabela.appendChild(div);
           });
-        } else {
-          minhaLista.innerHTML="<p>Você ainda não registrou nenhuma resposta.</p>";
         }
+      } else {
+        areaPainel.classList.add("escondido");
+      }
+      // Controle de "já respondeu hoje" para todos
+      var hoje=hojeBR();
+      var jaRespondeu=false;
+      dados.forEach(function(c){if(c.nome===usuarioAtual.nome&&c.data===hoje)jaRespondeu=true;});
+      var msg=document.getElementById("clima-ja-respondeu");
+      var form=document.getElementById("form-clima");
+      if(jaRespondeu){msg.classList.remove("escondido");form.classList.add("escondido");}
+      else{msg.classList.add("escondido");form.classList.remove("escondido");}
+      // Histórico pessoal
+      var minhaLista=document.getElementById("clima-minhas-respostas");
+      minhaLista.innerHTML="";
+      if(dados&&dados.length>0){
+        var humores=["","😞","🙁","😐","🙂","😄"];
+        dados.forEach(function(c){
+          if(c.nome===usuarioAtual.nome){
+            var div=document.createElement("div");
+            div.className="feedback-item";
+            div.innerHTML='<div class="feedback-cabecalho"><span>'+c.data+'</span></div><div class="feedback-texto"><strong>Humor:</strong> '+humores[c.humor]+' ('+c.humor+'/5) &nbsp; <strong>Satisfação:</strong> '+humores[c.satisfacao]+' ('+c.satisfacao+'/5)</div>'+(c.comentario?'<div class="feedback-texto">💬 '+c.comentario+'</div>':"");
+            minhaLista.appendChild(div);
+          }
+        });
+      } else {
+        minhaLista.innerHTML="<p>Você ainda não registrou nenhuma resposta.</p>";
       }
     })
     .catch(function(){});
