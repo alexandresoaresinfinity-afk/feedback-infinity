@@ -279,11 +279,7 @@ body{font-family:Arial,Helvetica,sans-serif;background:#f5f0e8;color:#1a3c34;min
 </div>
 
 <script>
-// ============================================================
-// COLE AQUI A URL DO SEU GOOGLE APPS SCRIPT (termina em /exec)
-// Ex.: https://script.google.com/macros/s/AKfycbxxxxx/exec
-// ============================================================
-var API_URL = https://script.google.com/macros/s/AKfycbxUPP6gJrDTv1wPpb60NR9B2Gp4RHi3K7uuUvnF3seprRdRXy0FxqilLjJ2BgZay7NUzA/exec;
+var API_URL = "https://script.google.com/macros/s/AKfycbxUPP6gJrDTv1wPpb60NR9B2Gp4RHi3K7uuUvnF3seprRdRXy0FxqilLjJ2BgZay7NUzA/exec";
 
 var usuarioAtual = null;
 var fotoPerfil = "";
@@ -320,17 +316,17 @@ function fazerLogin(){
   var nome=document.getElementById("login-nome").value.trim();
   var codigo=document.getElementById("login-codigo").value.trim();
   var erro=document.getElementById("login-erro");
-  if(!nome||!codigo){erro.textContent="Preencha nome e código.";return;}
+  if(!nome||!codigo){erro.textContent="Preencha nome e codigo.";return;}
   erro.textContent="Verificando...";
   fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({acao:"login",nome:nome,codigo:codigo})})
     .then(function(r){return r.json();})
     .then(function(res){
-      if(!res.ok){erro.textContent=res.erro||"Nome ou código incorretos.";return;}
+      if(!res.ok){erro.textContent=res.erro||"Nome ou codigo incorretos.";return;}
       usuarioAtual={nome:res.nome,perfil:res.perfil};
       sessionStorage.setItem("usuario",JSON.stringify(usuarioAtual));
       entrar();
     })
-    .catch(function(){erro.textContent="Falha de conexão. Confira se a URL do Apps Script está certa.";});
+    .catch(function(){erro.textContent="Falha de conexao. Confira se a URL do Apps Script esta certa.";});
 }
 
 function entrar(){
@@ -343,7 +339,6 @@ function entrar(){
   var botCad=document.getElementById("bot-cadastro");
   if(podeGerir){abaCad.classList.remove("escondido");botCad.style.display="block";}
   else{abaCad.classList.add("escondido");botCad.style.display="none";}
-  // Formulário de comunicado: só Admin
   var areaComunicado=document.getElementById("comunicado-form-area");
   if(ehAdmin()){areaComunicado.classList.remove("escondido");}
   else{areaComunicado.classList.add("escondido");}
@@ -366,17 +361,17 @@ document.getElementById("form-cadastro").addEventListener("submit",function(e){
   var nome=document.getElementById("c-nome").value.trim();
   var codigo=document.getElementById("c-codigo").value.trim();
   var perfil=document.getElementById("c-perfil").value;
-  if(!nome||!codigo){alert("Preencha o nome e o código.");return;}
+  if(!nome||!codigo){alert("Preencha o nome e o codigo.");return;}
   fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({acao:"cadastrar_usuario",nome:nome,codigo:codigo,perfil:perfil})})
     .then(function(r){return r.json();})
     .then(function(res){
-      if(!res.ok){alert(res.erro||"Não foi possível cadastrar.");return;}
-      alert("Usuário cadastrado! ✅");
+      if(!res.ok){alert(res.erro||"Nao foi possivel cadastrar.");return;}
+      alert("Usuario cadastrado!");
       document.getElementById("c-nome").value="";
       document.getElementById("c-codigo").value="";
       carregarPessoas();mostrarUsuarios();
     })
-    .catch(function(){alert("Falha de conexão.");});
+    .catch(function(){alert("Falha de conexao.");});
 });
 
 function carregarPessoas(){
@@ -420,7 +415,7 @@ function mostrarUsuarios(){
 function editarUsuario(nomeAntigo){
   var novoNome=prompt("Nome completo:",nomeAntigo);
   if(novoNome===null)return;
-  var novoCodigo=prompt("Código de acesso:");
+  var novoCodigo=prompt("Codigo de acesso:");
   if(novoCodigo===null)return;
   var novoPerfil=prompt("Perfil (Admin, Lider ou Liderado):");
   if(novoPerfil===null)return;
@@ -428,23 +423,23 @@ function editarUsuario(nomeAntigo){
   fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({acao:"editar_usuario",solicitante_perfil:usuarioAtual.perfil,nome_antigo:nomeAntigo,nome:novoNome,codigo:novoCodigo,perfil:novoPerfil})})
     .then(function(r){return r.json();})
     .then(function(res){
-      if(!res.ok){alert(res.erro||"Não foi possível editar.");return;}
-      alert("Usuário editado! ✅");
+      if(!res.ok){alert(res.erro||"Nao foi possivel editar.");return;}
+      alert("Usuario editado!");
       carregarPessoas();mostrarUsuarios();
     })
-    .catch(function(){alert("Falha de conexão.");});
+    .catch(function(){alert("Falha de conexao.");});
 }
 
 function excluirUsuario(nome){
-  if(!confirm("Excluir o usuário "+nome+"? Essa ação não pode ser desfeita."))return;
+  if(!confirm("Excluir o usuario "+nome+"? Essa acao nao pode ser desfeita."))return;
   fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({acao:"excluir_usuario",solicitante_perfil:usuarioAtual.perfil,nome:nome})})
     .then(function(r){return r.json();})
     .then(function(res){
-      if(!res.ok){alert(res.erro||"Não foi possível excluir.");return;}
-      alert("Usuário excluído.");
+      if(!res.ok){alert(res.erro||"Nao foi possivel excluir.");return;}
+      alert("Usuario excluido.");
       carregarPessoas();mostrarUsuarios();
     })
-    .catch(function(){alert("Falha de conexão.");});
+    .catch(function(){alert("Falha de conexao.");});
 }
 
 document.getElementById("perfil-foto").addEventListener("change",function(e){
@@ -492,10 +487,10 @@ function salvarPerfil(){
   fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify(dados)})
     .then(function(r){return r.json();})
     .then(function(res){
-      if(!res.ok){alert(res.erro||"Não foi possível salvar.");return;}
-      alert("Perfil salvo! ✅");
+      if(!res.ok){alert(res.erro||"Nao foi possivel salvar.");return;}
+      alert("Perfil salvo!");
     })
-    .catch(function(){alert("Falha de conexão.");});
+    .catch(function(){alert("Falha de conexao.");});
 }
 
 document.getElementById("form-feedback").addEventListener("submit",function(e){
@@ -505,8 +500,8 @@ document.getElementById("form-feedback").addEventListener("submit",function(e){
   var melhorar=document.getElementById("f-melhorar").value.trim();
   if(!para||!bom){alert("Preencha para quem e o que foi bom.");return;}
   fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({acao:"novo_feedback",de:usuarioAtual.nome,para:para,bom:bom,melhorar:melhorar,data:new Date().toLocaleString("pt-BR")})})
-    .then(function(){alert("Feedback enviado! ✅");document.getElementById("f-bom").value="";document.getElementById("f-melhorar").value="";carregarFeedbacks();})
-    .catch(function(erro){alert("Falha de conexão. Detalhe: "+erro);});
+    .then(function(){alert("Feedback enviado!");document.getElementById("f-bom").value="";document.getElementById("f-melhorar").value="";carregarFeedbacks();})
+    .catch(function(){alert("Falha de conexao.");});
 });
 
 function carregarFeedbacks(){
@@ -517,11 +512,11 @@ function carregarFeedbacks(){
     .then(function(r){return r.json();})
     .then(function(dados){
       lista.innerHTML="";
-      if(!dados||dados.length===0){lista.innerHTML="<p>Nenhum feedback envolvendo você ainda.</p>";return;}
+      if(!dados||dados.length===0){lista.innerHTML="<p>Nenhum feedback envolvendo voce ainda.</p>";return;}
       dados.forEach(function(fb){
         var div=document.createElement("div");
         div.className="feedback-item";
-        var editado=fb.editadoEm?'<div class="feedback-texto" style="color:#6b7a72;font-size:.8rem;margin-top:6px;">✏️ Editado em: '+fb.editadoEm+'</div>':"";
+        var editado=fb.editadoEm?'<div class="feedback-texto" style="color:#6b7a72;font-size:.8rem;margin-top:6px;">Editado em: '+fb.editadoEm+'</div>':"";
         var acoes="";
         if(ehLideranca()){
           acoes='<div class="feedback-acoes"><button class="btn-pequeno" onclick="editarFeedback(\''+fb.data.replace(/'/g,"\'")+'\',\''+fb.de.replace(/'/g,"\'")+'\',\''+fb.para.replace(/'/g,"\'")+'\')">Editar</button>';
@@ -534,7 +529,7 @@ function carregarFeedbacks(){
         lista.appendChild(div);
       });
     })
-    .catch(function(){lista.innerHTML="<p>Não foi possível carregar os feedbacks.</p>";});
+    .catch(function(){lista.innerHTML="<p>Nao foi possivel carregar os feedbacks.</p>";});
 }
 
 function editarFeedback(data,de,para){
@@ -542,27 +537,27 @@ function editarFeedback(data,de,para){
   if(novoBom===null)return;
   var novoMelhorar=prompt("O que pode melhorar?");
   if(novoMelhorar===null)return;
-  if(!novoBom){alert("Preencha o campo 'o que foi bom'.");return;}
+  if(!novoBom){alert("Preencha o campo o que foi bom.");return;}
   fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({acao:"editar_feedback",solicitante_perfil:usuarioAtual.perfil,data:data,de:de,para:para,bom:novoBom,melhorar:novoMelhorar})})
     .then(function(r){return r.json();})
     .then(function(res){
-      if(!res.ok){alert(res.erro||"Não foi possível editar.");return;}
-      alert("Feedback editado! ✅");
+      if(!res.ok){alert(res.erro||"Nao foi possivel editar.");return;}
+      alert("Feedback editado!");
       carregarFeedbacks();
     })
-    .catch(function(){alert("Falha de conexão.");});
+    .catch(function(){alert("Falha de conexao.");});
 }
 
 function excluirFeedback(data,de,para){
-  if(!confirm("Excluir este feedback? Essa ação não pode ser desfeita."))return;
+  if(!confirm("Excluir este feedback? Essa acao nao pode ser desfeita."))return;
   fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({acao:"excluir_feedback",solicitante_perfil:usuarioAtual.perfil,data:data,de:de,para:para})})
     .then(function(r){return r.json();})
     .then(function(res){
-      if(!res.ok){alert(res.erro||"Não foi possível excluir.");return;}
-      alert("Feedback excluído.");
+      if(!res.ok){alert(res.erro||"Nao foi possivel excluir.");return;}
+      alert("Feedback excluido.");
       carregarFeedbacks();
     })
-    .catch(function(){alert("Falha de conexão.");});
+    .catch(function(){alert("Falha de conexao.");});
 }
 
 document.getElementById("form-elogio").addEventListener("submit",function(e){
@@ -571,8 +566,8 @@ document.getElementById("form-elogio").addEventListener("submit",function(e){
   var texto=document.getElementById("e-texto").value.trim();
   if(!para||!texto){alert("Preencha para quem e o texto.");return;}
   fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({acao:"novo_elogio",de:usuarioAtual.nome,para:para,texto:texto,data:new Date().toLocaleString("pt-BR")})})
-    .then(function(){alert("Elogio publicado! 🌟");document.getElementById("e-texto").value="";carregarElogios();})
-    .catch(function(erro){alert("Falha de conexão. Detalhe: "+erro);});
+    .then(function(){alert("Elogio publicado!");document.getElementById("e-texto").value="";carregarElogios();})
+    .catch(function(){alert("Falha de conexao.");});
 });
 
 function carregarElogios(){
@@ -582,7 +577,7 @@ function carregarElogios(){
     .then(function(r){return r.json();})
     .then(function(dados){
       lista.innerHTML="";
-      if(!dados||dados.length===0){lista.innerHTML="<p>Ainda não há elogios. Seja o primeiro! 🌟</p>";return;}
+      if(!dados||dados.length===0){lista.innerHTML="<p>Ainda nao ha elogios. Seja o primeiro!</p>";return;}
       dados.forEach(function(el){
         var div=document.createElement("div");
         div.className="elogio";
@@ -590,21 +585,21 @@ function carregarElogios(){
         lista.appendChild(div);
       });
     })
-    .catch(function(){lista.innerHTML="<p>Não foi possível carregar os elogios.</p>";});
+    .catch(function(){lista.innerHTML="<p>Nao foi possivel carregar os elogios.</p>";});
 }
 
 document.getElementById("form-clima").addEventListener("submit",function(e){
   e.preventDefault();
-  if(!notaHumor||!notaSatisfacao){alert("Escolha seu humor e sua satisfação (toque nos emoticons).");return;}
+  if(!notaHumor||!notaSatisfacao){alert("Escolha seu humor e sua satisfacao (toque nos emoticons).");return;}
   var comentario=document.getElementById("clima-comentario").value.trim();
   fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({acao:"novo_clima",nome:usuarioAtual.nome,humor:notaHumor,satisfacao:notaSatisfacao,comentario:comentario})})
     .then(function(r){return r.json();})
     .then(function(res){
-      if(!res.ok){alert(res.erro||"Não foi possível registrar.");return;}
-      alert("Clima registrado! 🌡️ Obrigado por responder.");
+      if(!res.ok){alert(res.erro||"Nao foi possivel registrar.");return;}
+      alert("Clima registrado! Obrigado por responder.");
       carregarClima();
     })
-    .catch(function(){alert("Falha de conexão.");});
+    .catch(function(){alert("Falha de conexao.");});
 });
 
 function carregarClima(){
@@ -619,13 +614,13 @@ function carregarClima(){
         areaPainel.classList.remove("escondido");
         var tabela=document.getElementById("clima-tabela");
         tabela.innerHTML="";
-        if(!dados||dados.length===0){tabela.innerHTML="<p>Ainda não há respostas de clima.</p>";}
+        if(!dados||dados.length===0){tabela.innerHTML="<p>Ainda nao ha respostas de clima.</p>";}
         else{
           var humores=["","😞","🙁","😐","🙂","😄"];
           dados.forEach(function(c){
             var div=document.createElement("div");
             div.className="feedback-item";
-            div.innerHTML='<div class="feedback-cabecalho"><span>'+c.nome+'</span><span class="feedback-data">'+c.data+'</span></div><div class="feedback-texto"><strong>Humor:</strong> '+humores[c.humor]+' ('+c.humor+'/5) &nbsp; <strong>Satisfação:</strong> '+humores[c.satisfacao]+' ('+c.satisfacao+'/5)</div>'+(c.comentario?'<div class="feedback-texto">💬 '+c.comentario+'</div>':"");
+            div.innerHTML='<div class="feedback-cabecalho"><span>'+c.nome+'</span><span class="feedback-data">'+c.data+'</span></div><div class="feedback-texto"><strong>Humor:</strong> '+humores[c.humor]+' ('+c.humor+'/5) &nbsp; <strong>Satisfacao:</strong> '+humores[c.satisfacao]+' ('+c.satisfacao+'/5)</div>'+(c.comentario?'<div class="feedback-texto">'+c.comentario+'</div>':"");
             tabela.appendChild(div);
           });
         }
@@ -647,12 +642,12 @@ function carregarClima(){
           if(c.nome===usuarioAtual.nome){
             var div=document.createElement("div");
             div.className="feedback-item";
-            div.innerHTML='<div class="feedback-cabecalho"><span>'+c.data+'</span></div><div class="feedback-texto"><strong>Humor:</strong> '+humores[c.humor]+' ('+c.humor+'/5) &nbsp; <strong>Satisfação:</strong> '+humores[c.satisfacao]+' ('+c.satisfacao+'/5)</div>'+(c.comentario?'<div class="feedback-texto">💬 '+c.comentario+'</div>':"");
+            div.innerHTML='<div class="feedback-cabecalho"><span>'+c.data+'</span></div><div class="feedback-texto"><strong>Humor:</strong> '+humores[c.humor]+' ('+c.humor+'/5) &nbsp; <strong>Satisfacao:</strong> '+humores[c.satisfacao]+' ('+c.satisfacao+'/5)</div>'+(c.comentario?'<div class="feedback-texto">'+c.comentario+'</div>':"");
             minhaLista.appendChild(div);
           }
         });
       } else {
-        minhaLista.innerHTML="<p>Você ainda não registrou nenhuma resposta.</p>";
+        minhaLista.innerHTML="<p>Voce ainda nao registrou nenhuma resposta.</p>";
       }
     })
     .catch(function(){});
@@ -662,17 +657,17 @@ document.getElementById("form-comunicado").addEventListener("submit",function(e)
   e.preventDefault();
   var titulo=document.getElementById("c-titulo").value.trim();
   var texto=document.getElementById("c-texto").value.trim();
-  if(!titulo||!texto){alert("Preencha o título e o texto.");return;}
+  if(!titulo||!texto){alert("Preencha o titulo e o texto.");return;}
   fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({acao:"novo_comunicado",solicitante_perfil:usuarioAtual.perfil,titulo:titulo,texto:texto,data:new Date().toLocaleString("pt-BR")})})
     .then(function(r){return r.json();})
     .then(function(res){
-      if(!res.ok){alert(res.erro||"Não foi possível publicar.");return;}
-      alert("Comunicado publicado! 📢");
+      if(!res.ok){alert(res.erro||"Nao foi possivel publicar.");return;}
+      alert("Comunicado publicado!");
       document.getElementById("c-titulo").value="";
       document.getElementById("c-texto").value="";
       carregarComunicados();
     })
-    .catch(function(){alert("Falha de conexão.");});
+    .catch(function(){alert("Falha de conexao.");});
 });
 
 function carregarComunicados(){
@@ -682,48 +677,48 @@ function carregarComunicados(){
     .then(function(r){return r.json();})
     .then(function(dados){
       lista.innerHTML="";
-      if(!dados||dados.length===0){lista.innerHTML="<p>Ainda não há comunicados.</p>";return;}
+      if(!dados||dados.length===0){lista.innerHTML="<p>Ainda nao ha comunicados.</p>";return;}
       dados.forEach(function(c){
         var div=document.createElement("div");
         div.className="comunicado-item";
-        var editado=c.editadoEm?'<div class="comunicado-texto" style="color:#6b7a72;font-size:.8rem;margin-top:6px;">✏️ Editado em: '+c.editadoEm+'</div>':"";
+        var editado=c.editadoEm?'<div class="comunicado-texto" style="color:#6b7a72;font-size:.8rem;margin-top:6px;">Editado em: '+c.editadoEm+'</div>':"";
         var acoes="";
         if(ehAdmin()){
           acoes='<div class="feedback-acoes"><button class="btn-pequeno" onclick="editarComunicado(\''+c.data.replace(/'/g,"\'")+'\',\''+c.titulo.replace(/'/g,"\'")+'\')">Editar</button><button class="btn-pequeno vermelho" onclick="excluirComunicado(\''+c.data.replace(/'/g,"\'")+'\',\''+c.titulo.replace(/'/g,"\'")+'\')">Excluir</button></div>';
         }
-        div.innerHTML='<div class="comunicado-cabecalho"><span>📢 '+c.titulo+'</span><span class="comunicado-data">'+c.data+'</span></div><div class="comunicado-texto">'+c.texto+'</div>'+editado+acoes;
+        div.innerHTML='<div class="comunicado-cabecalho"><span>'+c.titulo+'</span><span class="comunicado-data">'+c.data+'</span></div><div class="comunicado-texto">'+c.texto+'</div>'+editado+acoes;
         lista.appendChild(div);
       });
     })
-    .catch(function(){lista.innerHTML="<p>Não foi possível carregar os comunicados.</p>";});
+    .catch(function(){lista.innerHTML="<p>Nao foi possivel carregar os comunicados.</p>";});
 }
 
 function editarComunicado(data,tituloAntigo){
-  var novoTitulo=prompt("Título:",tituloAntigo);
+  var novoTitulo=prompt("Titulo:",tituloAntigo);
   if(novoTitulo===null)return;
   var novoTexto=prompt("Texto do comunicado:");
   if(novoTexto===null)return;
-  if(!novoTitulo||!novoTexto){alert("Preencha o título e o texto.");return;}
+  if(!novoTitulo||!novoTexto){alert("Preencha o titulo e o texto.");return;}
   fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({acao:"editar_comunicado",solicitante_perfil:usuarioAtual.perfil,data:data,titulo_antigo:tituloAntigo,titulo:novoTitulo,texto:novoTexto})})
     .then(function(r){return r.json();})
     .then(function(res){
-      if(!res.ok){alert(res.erro||"Não foi possível editar.");return;}
-      alert("Comunicado editado! ✅");
+      if(!res.ok){alert(res.erro||"Nao foi possivel editar.");return;}
+      alert("Comunicado editado!");
       carregarComunicados();
     })
-    .catch(function(){alert("Falha de conexão.");});
+    .catch(function(){alert("Falha de conexao.");});
 }
 
 function excluirComunicado(data,titulo){
-  if(!confirm("Excluir o comunicado '"+titulo+"'? Essa ação não pode ser desfeita."))return;
+  if(!confirm("Excluir o comunicado "+titulo+"? Essa acao nao pode ser desfeita."))return;
   fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({acao:"excluir_comunicado",solicitante_perfil:usuarioAtual.perfil,data:data,titulo:titulo})})
     .then(function(r){return r.json();})
     .then(function(res){
-      if(!res.ok){alert(res.erro||"Não foi possível excluir.");return;}
-      alert("Comunicado excluído.");
+      if(!res.ok){alert(res.erro||"Nao foi possivel excluir.");return;}
+      alert("Comunicado excluido.");
       carregarComunicados();
     })
-    .catch(function(){alert("Falha de conexão.");});
+    .catch(function(){alert("Falha de conexao.");});
 }
 </script>
 </body>
