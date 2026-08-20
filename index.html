@@ -42,20 +42,26 @@ body{font-family:Arial,Helvetica,sans-serif;background:#f5f0e8;color:#1a3c34;min
 .btn-primario:hover{background:#24564a}
 .btn-pequeno{background:#1a3c34;color:#fff;border:none;padding:8px 14px;border-radius:8px;font-size:.85rem;font-weight:700;cursor:pointer;margin-left:6px}
 .btn-pequeno.vermelho{background:#c0392b}
+.btn-pequeno.verde{background:#2e7d32}
 .usuario-item{display:flex;justify-content:space-between;align-items:center;border:1px solid #e5ddd0;border-radius:10px;padding:10px 14px;margin-bottom:8px;background:#faf7f1}
 .usuario-item .usuario-info{display:flex;align-items:center;gap:10px}
 .usuario-item .usuario-nome{font-weight:700}
 .usuario-item .usuario-perfil{background:#1a3c34;color:#fff;padding:3px 10px;border-radius:20px;font-size:.75rem}
 .foto-mini{width:36px;height:36px;border-radius:50%;object-fit:cover;background:#e5ddd0}
 .foto-grande{width:110px;height:110px;border-radius:50%;object-fit:cover;background:#e5ddd0;display:block;margin:0 auto 14px}
-.elogio,.feedback-item,.comunicado-item{border:1px solid #e5ddd0;border-radius:12px;padding:16px;margin-bottom:12px;background:#faf7f1}
-.elogio .elogio-cabecalho,.feedback-item .feedback-cabecalho,.comunicado-item .comunicado-cabecalho{display:flex;justify-content:space-between;margin-bottom:8px;font-weight:700}
-.elogio .elogio-data,.feedback-item .feedback-data,.comunicado-item .comunicado-data{color:#6b7a72;font-weight:400;font-size:.85rem}
-.elogio .elogio-texto,.feedback-item .feedback-texto,.comunicado-item .comunicado-texto{color:#333}
+.elogio,.feedback-item,.comunicado-item,.reuniao-item{border:1px solid #e5ddd0;border-radius:12px;padding:16px;margin-bottom:12px;background:#faf7f1}
+.elogio .elogio-cabecalho,.feedback-item .feedback-cabecalho,.comunicado-item .comunicado-cabecalho,.reuniao-item .reuniao-cabecalho{display:flex;justify-content:space-between;margin-bottom:8px;font-weight:700}
+.elogio .elogio-data,.feedback-item .feedback-data,.comunicado-item .comunicado-data,.reuniao-item .reuniao-data{color:#6b7a72;font-weight:400;font-size:.85rem}
+.elogio .elogio-texto,.feedback-item .feedback-texto,.comunicado-item .comunicado-texto,.reuniao-item .reuniao-texto{color:#333}
+.comunicado-imagem{max-width:100%;border-radius:10px;margin-top:10px}
 .feedback-acoes{margin-top:10px;text-align:right}
+.comentario-item{border-top:1px solid #e5ddd0;padding:8px 0;margin-top:8px}
+.comentario-item .comentario-autor{font-weight:700;font-size:.85rem}
+.comentario-item .comentario-data{color:#6b7a72;font-size:.75rem}
 .clima-nota{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
 .clima-nota button{flex:1;min-width:50px;padding:10px;border:2px solid #ddd;border-radius:10px;background:#fff;font-size:1.3rem;cursor:pointer}
 .clima-nota button.selecionado{border-color:#1a3c34;background:#e8f0ec}
+.aceito-badge{background:#2e7d32;color:#fff;padding:3px 10px;border-radius:20px;font-size:.75rem;font-weight:700}
 </style>
 </head>
 <body>
@@ -113,6 +119,9 @@ body{font-family:Arial,Helvetica,sans-serif;background:#f5f0e8;color:#1a3c34;min
               </label>
               <label>Texto do comunicado
                 <textarea id="c-texto" placeholder="Escreva o comunicado aqui..." required></textarea>
+              </label>
+              <label>Imagem (opcional)
+                <input type="file" id="c-imagem" accept="image/*">
               </label>
               <button type="submit" class="btn-primario">Publicar comunicado</button>
             </form>
@@ -209,7 +218,35 @@ body{font-family:Arial,Helvetica,sans-serif;background:#f5f0e8;color:#1a3c34;min
       </section>
 
       <section id="aba-1on1" class="aba escondido">
-        <div class="card"><h2>🤝 Reuniões 1:1</h2><p class="sub">Registre suas conversas individuais (em breve)</p><p>Este módulo será liberado na próxima fase.</p></div>
+        <div id="reuniao-form-area" class="escondido">
+          <div class="card">
+            <h2>🤝 Nova Reunião 1:1</h2>
+            <p class="sub">Registre a conversa individual (somente liderança)</p>
+            <form id="form-reuniao">
+              <label>Data e hora da reunião
+                <input type="text" id="r-data" placeholder="Ex.: 20/08/2026 14:00" required>
+              </label>
+              <label>Com quem (liderado)
+                <select id="r-liderado"><option value="">Selecione a pessoa...</option></select>
+              </label>
+              <label>Assuntos / pauta discutidos
+                <textarea id="r-pauta" placeholder="O que foi conversado..." required></textarea>
+              </label>
+              <label>Ações e próximos passos
+                <textarea id="r-acoes" placeholder="O que ficou combinado..."></textarea>
+              </label>
+              <label>Notas gerais da conversa
+                <textarea id="r-notas" placeholder="Observações adicionais..."></textarea>
+              </label>
+              <button type="submit" class="btn-primario">Registrar reunião</button>
+            </form>
+          </div>
+        </div>
+        <div class="card">
+          <h2>📋 Reuniões 1:1</h2>
+          <p class="sub">Visível para líder, liderado e liderança</p>
+          <div id="lista-reunioes"></div>
+        </div>
       </section>
 
       <section id="aba-okrs" class="aba escondido">
@@ -285,6 +322,7 @@ var usuarioAtual = null;
 var fotoPerfil = "";
 var notaHumor = 0;
 var notaSatisfacao = 0;
+var imagemComunicado = "";
 
 function hojeBR(){var d=new Date();return d.getDate()+"/"+("0"+(d.getMonth()+1)).slice(-2)+"/"+d.getFullYear();}
 function ehLideranca(){return usuarioAtual&&(usuarioAtual.perfil==="Admin"||usuarioAtual.perfil==="Lider");}
@@ -301,6 +339,7 @@ function mostrarAba(id,botao){
   if(id==="aba-cadastro"){mostrarUsuarios();}
   if(id==="aba-clima"){carregarClima();}
   if(id==="aba-comunicados"){carregarComunicados();}
+  if(id==="aba-1on1"){carregarReunioes();}
 }
 
 function escolherNota(tipo,valor){
@@ -342,8 +381,11 @@ function entrar(){
   var areaComunicado=document.getElementById("comunicado-form-area");
   if(ehAdmin()){areaComunicado.classList.remove("escondido");}
   else{areaComunicado.classList.add("escondido");}
+  var areaReuniao=document.getElementById("reuniao-form-area");
+  if(ehLideranca()){areaReuniao.classList.remove("escondido");}
+  else{areaReuniao.classList.add("escondido");}
   mostrarAba("aba-comunicados",document.querySelector('.menu-item[onclick*="aba-comunicados"]'));
-  carregarPessoas();carregarElogios();carregarFeedbacks();carregarComunicados();
+  carregarPessoas();carregarElogios();carregarFeedbacks();carregarComunicados();carregarReunioes();
 }
 
 function sair(){
@@ -380,11 +422,14 @@ function carregarPessoas(){
     .then(function(dados){
       var selF=document.getElementById("f-para");
       var selE=document.getElementById("e-para");
+      var selR=document.getElementById("r-liderado");
       selF.innerHTML='<option value="">Selecione a pessoa...</option>';
       selE.innerHTML='<option value="">Selecione a pessoa...</option>';
+      selR.innerHTML='<option value="">Selecione a pessoa...</option>';
       dados.forEach(function(p){
         var o1=document.createElement("option");o1.value=p.nome;o1.textContent=p.nome;selF.appendChild(o1);
         var o2=document.createElement("option");o2.value=p.nome;o2.textContent=p.nome;selE.appendChild(o2);
+        var o3=document.createElement("option");o3.value=p.nome;o3.textContent=p.nome;selR.appendChild(o3);
       });
     })
     .catch(function(){});
@@ -653,18 +698,28 @@ function carregarClima(){
     .catch(function(){});
 }
 
+document.getElementById("c-imagem").addEventListener("change",function(e){
+  var arquivo=e.target.files[0];
+  if(!arquivo)return;
+  var leitor=new FileReader();
+  leitor.onload=function(ev){imagemComunicado=ev.target.result;};
+  leitor.readAsDataURL(arquivo);
+});
+
 document.getElementById("form-comunicado").addEventListener("submit",function(e){
   e.preventDefault();
   var titulo=document.getElementById("c-titulo").value.trim();
   var texto=document.getElementById("c-texto").value.trim();
   if(!titulo||!texto){alert("Preencha o titulo e o texto.");return;}
-  fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({acao:"novo_comunicado",solicitante_perfil:usuarioAtual.perfil,titulo:titulo,texto:texto,data:new Date().toLocaleString("pt-BR")})})
+  fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({acao:"novo_comunicado",solicitante_perfil:usuarioAtual.perfil,titulo:titulo,texto:texto,data:new Date().toLocaleString("pt-BR"),imagem:imagemComunicado})})
     .then(function(r){return r.json();})
     .then(function(res){
       if(!res.ok){alert(res.erro||"Nao foi possivel publicar.");return;}
       alert("Comunicado publicado!");
       document.getElementById("c-titulo").value="";
       document.getElementById("c-texto").value="";
+      document.getElementById("c-imagem").value="";
+      imagemComunicado="";
       carregarComunicados();
     })
     .catch(function(){alert("Falha de conexao.");});
@@ -682,11 +737,12 @@ function carregarComunicados(){
         var div=document.createElement("div");
         div.className="comunicado-item";
         var editado=c.editadoEm?'<div class="comunicado-texto" style="color:#6b7a72;font-size:.8rem;margin-top:6px;">Editado em: '+c.editadoEm+'</div>':"";
+        var imagem=c.imagem?'<img class="comunicado-imagem" src="'+c.imagem+'" alt="Imagem do comunicado">':"";
         var acoes="";
         if(ehAdmin()){
           acoes='<div class="feedback-acoes"><button class="btn-pequeno" onclick="editarComunicado(\''+c.data.replace(/'/g,"\'")+'\',\''+c.titulo.replace(/'/g,"\'")+'\')">Editar</button><button class="btn-pequeno vermelho" onclick="excluirComunicado(\''+c.data.replace(/'/g,"\'")+'\',\''+c.titulo.replace(/'/g,"\'")+'\')">Excluir</button></div>';
         }
-        div.innerHTML='<div class="comunicado-cabecalho"><span>'+c.titulo+'</span><span class="comunicado-data">'+c.data+'</span></div><div class="comunicado-texto">'+c.texto+'</div>'+editado+acoes;
+        div.innerHTML='<div class="comunicado-cabecalho"><span>'+c.titulo+'</span><span class="comunicado-data">'+c.data+'</span></div><div class="comunicado-texto">'+c.texto+'</div>'+imagem+editado+acoes;
         lista.appendChild(div);
       });
     })
@@ -699,11 +755,12 @@ function editarComunicado(data,tituloAntigo){
   var novoTexto=prompt("Texto do comunicado:");
   if(novoTexto===null)return;
   if(!novoTitulo||!novoTexto){alert("Preencha o titulo e o texto.");return;}
-  fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({acao:"editar_comunicado",solicitante_perfil:usuarioAtual.perfil,data:data,titulo_antigo:tituloAntigo,titulo:novoTitulo,texto:novoTexto})})
+  fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({acao:"editar_comunicado",solicitante_perfil:usuarioAtual.perfil,data:data,titulo_antigo:tituloAntigo,titulo:novoTitulo,texto:novoTexto,imagem:imagemComunicado})})
     .then(function(r){return r.json();})
     .then(function(res){
       if(!res.ok){alert(res.erro||"Nao foi possivel editar.");return;}
       alert("Comunicado editado!");
+      imagemComunicado="";
       carregarComunicados();
     })
     .catch(function(){alert("Falha de conexao.");});
@@ -717,6 +774,109 @@ function excluirComunicado(data,titulo){
       if(!res.ok){alert(res.erro||"Nao foi possivel excluir.");return;}
       alert("Comunicado excluido.");
       carregarComunicados();
+    })
+    .catch(function(){alert("Falha de conexao.");});
+}
+
+document.getElementById("form-reuniao").addEventListener("submit",function(e){
+  e.preventDefault();
+  var data=document.getElementById("r-data").value.trim();
+  var liderado=document.getElementById("r-liderado").value;
+  var pauta=document.getElementById("r-pauta").value.trim();
+  var acoes=document.getElementById("r-acoes").value.trim();
+  var notas=document.getElementById("r-notas").value.trim();
+  if(!data||!liderado||!pauta){alert("Preencha data, pessoa e pauta.");return;}
+  fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({acao:"novo_1on1",solicitante_perfil:usuarioAtual.perfil,data:data,lider:usuarioAtual.nome,liderado:liderado,pauta:pauta,acoes:acoes,notas:notas})})
+    .then(function(r){return r.json();})
+    .then(function(res){
+      if(!res.ok){alert(res.erro||"Nao foi possivel registrar.");return;}
+      alert("Reuniao registrada!");
+      document.getElementById("r-data").value="";
+      document.getElementById("r-pauta").value="";
+      document.getElementById("r-acoes").value="";
+      document.getElementById("r-notas").value="";
+      carregarReunioes();
+    })
+    .catch(function(){alert("Falha de conexao.");});
+});
+
+function carregarReunioes(){
+  var lista=document.getElementById("lista-reunioes");
+  lista.innerHTML="<p>Carregando reunioes...</p>";
+  var url=API_URL+"?acao=listar_1on1&usuario="+encodeURIComponent(usuarioAtual.nome)+"&perfil="+encodeURIComponent(usuarioAtual.perfil);
+  fetch(url)
+    .then(function(r){return r.json();})
+    .then(function(dados){
+      lista.innerHTML="";
+      if(!dados||dados.length===0){lista.innerHTML="<p>Nenhuma reuniao 1:1 ainda.</p>";return;}
+      dados.forEach(function(r){
+        var div=document.createElement("div");
+        div.className="reuniao-item";
+        var aceito=r.aceito?'<span class="aceito-badge">✅ Aceito em '+r.aceito+'</span>':"";
+        var botaoAceite="";
+        if(r.liderado===usuarioAtual.nome&&!r.aceito){
+          botaoAceite='<button class="btn-pequeno verde" onclick="aceitarReuniao(\''+r.id+'\')">Dar aceite</button>';
+        }
+        var botaoEditar="";
+        if(ehLideranca()){
+          botaoEditar='<button class="btn-pequeno" onclick="editarReuniao(\''+r.id+'\')">Editar</button>';
+        }
+        var comentariosHtml="";
+        if(r.comentarios&&r.comentarios.length>0){
+          comentariosHtml='<div style="margin-top:10px;"><strong>Comentários:</strong>';
+          r.comentarios.forEach(function(cm){
+            comentariosHtml+='<div class="comentario-item"><span class="comentario-autor">'+cm.autor+'</span> <span class="comentario-data">'+cm.data+'</span><div>'+cm.texto+'</div></div>';
+          });
+          comentariosHtml+='</div>';
+        }
+        var formComentario='<div style="margin-top:10px;"><input type="text" id="comentario-'+r.id+'" placeholder="Escreva um comentario..." style="width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;"><button class="btn-pequeno" style="margin-top:6px;" onclick="comentarReuniao(\''+r.id+'\')">Comentar</button></div>';
+        div.innerHTML='<div class="reuniao-cabecalho"><span>'+r.lider+' → '+r.liderado+'</span><span class="reuniao-data">'+r.data+'</span></div><div class="reuniao-texto"><strong>Pauta:</strong> '+r.pauta+'</div>'+(r.acoes?'<div class="reuniao-texto"><strong>Ações:</strong> '+r.acoes+'</div>':"")+(r.notas?'<div class="reuniao-texto"><strong>Notas:</strong> '+r.notas+'</div>':"")+'<div style="margin-top:8px;">'+aceito+'</div><div class="feedback-acoes">'+botaoAceite+botaoEditar+'</div>'+comentariosHtml+formComentario;
+        lista.appendChild(div);
+      });
+    })
+    .catch(function(){lista.innerHTML="<p>Nao foi possivel carregar as reunioes.</p>";});
+}
+
+function aceitarReuniao(id){
+  if(!confirm("Confirmar o aceite desta reuniao?"))return;
+  fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({acao:"aceitar_1on1",id:id})})
+    .then(function(r){return r.json();})
+    .then(function(res){
+      if(!res.ok){alert(res.erro||"Nao foi possivel aceitar.");return;}
+      alert("Aceite registrado!");
+      carregarReunioes();
+    })
+    .catch(function(){alert("Falha de conexao.");});
+}
+
+function editarReuniao(id){
+  var novaData=prompt("Data e hora da reuniao:");
+  if(novaData===null)return;
+  var novaPauta=prompt("Assuntos / pauta:");
+  if(novaPauta===null)return;
+  var novasAcoes=prompt("Acoes e proximos passos:");
+  if(novasAcoes===null)return;
+  var novasNotas=prompt("Notas gerais:");
+  if(novasNotas===null)return;
+  fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({acao:"editar_1on1",solicitante_perfil:usuarioAtual.perfil,id:id,data:novaData,lider:usuarioAtual.nome,liderado:usuarioAtual.nome,pauta:novaPauta,acoes:novasAcoes,notas:novasNotas})})
+    .then(function(r){return r.json();})
+    .then(function(res){
+      if(!res.ok){alert(res.erro||"Nao foi possivel editar.");return;}
+      alert("Reuniao editada!");
+      carregarReunioes();
+    })
+    .catch(function(){alert("Falha de conexao.");});
+}
+
+function comentarReuniao(id){
+  var texto=document.getElementById("comentario-"+id).value.trim();
+  if(!texto){alert("Escreva um comentario.");return;}
+  fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({acao:"comentar_1on1",id:id,autor:usuarioAtual.nome,texto:texto})})
+    .then(function(r){return r.json();})
+    .then(function(res){
+      if(!res.ok){alert(res.erro||"Nao foi possivel comentar.");return;}
+      alert("Comentario adicionado!");
+      carregarReunioes();
     })
     .catch(function(){alert("Falha de conexao.");});
 }
