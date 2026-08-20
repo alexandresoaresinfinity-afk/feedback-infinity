@@ -70,7 +70,8 @@ body{font-family:Arial,Helvetica,sans-serif;background:#f5f0e8;color:#1a3c34;min
 .modal-card{background:#fff;border-radius:16px;padding:28px;width:100%;max-width:480px;box-shadow:0 8px 30px rgba(0,0,0,.25);max-height:90vh;overflow-y:auto}
 .modal-card h3{margin-bottom:14px;color:#1a3c34}
 .modal-card label{display:block;font-weight:600;margin-bottom:14px}
-.modal-card input,.modal-card select{width:100%;padding:12px;margin-top:6px;border:1px solid #ccc;border-radius:8px;font-size:1rem;font-family:inherit}
+.modal-card input,.modal-card select,.modal-card textarea{width:100%;padding:12px;margin-top:6px;border:1px solid #ccc;border-radius:8px;font-size:1rem;font-family:inherit}
+.modal-card textarea{min-height:70px;resize:vertical}
 .modal-acoes{display:flex;gap:10px;margin-top:18px}
 .modal-acoes .btn-primario{width:auto;flex:1}
 .btn-cancelar{background:#e5ddd0;color:#1a3c34;border:none;padding:14px 20px;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;flex:1}
@@ -381,6 +382,19 @@ body{font-family:Arial,Helvetica,sans-serif;background:#f5f0e8;color:#1a3c34;min
   </div>
 </div>
 
+<div id="modal-form" class="modal-overlay escondido">
+  <div class="modal-card">
+    <h3 id="form-modal-titulo"></h3>
+    <form id="form-modal">
+      <div id="form-modal-campos"></div>
+      <div class="modal-acoes">
+        <button type="button" class="btn-cancelar" onclick="fecharFormModal()">Cancelar</button>
+        <button type="submit" class="btn-primario">Salvar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <div id="modal-confirmar" class="modal-overlay escondido">
   <div class="modal-card">
     <h3 id="confirmar-titulo">Confirmar</h3>
@@ -405,6 +419,8 @@ var imagemComunicado = "";
 var modoUsuario = "novo";
 var usuarioEditandoNome = "";
 var confirmarCallback = null;
+var formModalCampos = [];
+var formModalAoSalvar = null;
 var rotuloPerfil = { Admin: "Admin", Lider: "Líder", Liderado: "Liderado" };
 
 function hojeBR(){var d=new Date();return d.getDate()+"/"+("0"+(d.getMonth()+1)).slice(-2)+"/"+d.getFullYear();}
@@ -430,6 +446,51 @@ function fecharModalConfirmar(ok){
   document.getElementById("modal-confirmar").classList.add("escondido");
   if(ok&&confirmarCallback){var fn=confirmarCallback;confirmarCallback=null;fn();}
 }
+
+function abrirFormModal(titulo,campos,aoSalvar){
+  formModalCampos=campos;
+  formModalAoSalvar=aoSalvar;
+  document.getElementById("form-modal-titulo").textContent=titulo;
+  var area=document.getElementById("form-modal-campos");
+  area.innerHTML="";
+  campos.forEach(function(c){
+    var label=document.createElement("label");
+    label.textContent=c.label;
+    var entrada;
+    if(c.tipo==="textarea"){
+      entrada=document.createElement("textarea");
+      entrada.style.minHeight="70px";
+    }else if(c.tipo==="number"){
+      entrada=document.createElement("input");
+      entrada.type="number";
+      entrada.min="0";
+      entrada.max="100";
+    }else{
+      entrada=document.createElement("input");
+      entrada.type="text";
+    }
+    entrada.id="fm-"+c.key;
+    entrada.value=c.valor||"";
+    label.appendChild(entrada);
+    area.appendChild(label);
+  });
+  document.getElementById("modal-form").classList.remove("escondido");
+}
+
+function fecharFormModal(){
+  document.getElementById("modal-form").classList.add("escondido");
+}
+
+document.getElementById("form-modal").addEventListener("submit",function(e){
+  e.preventDefault();
+  var valores={};
+  formModalCampos.forEach(function(c){
+    var el=document.getElementById("fm-"+c.key);
+    valores[c.key]=el?el.value.trim():"";
+  });
+  document.getElementById("modal-form").classList.add("escondido");
+  if(formModalAoSalvar){var fn=formModalAoSalvar;formModalAoSalvar=null;fn(valores);}
+});
 
 function mostrarAba(id,botao){
   var abas=document.querySelectorAll(".aba");
@@ -527,7 +588,7 @@ function carregarPessoas(){
     .catch(function(){});
 }
 
-function carregarLideres(sel1,sel2){
+function preencherLideres(sel1,sel2){
   fetch(API_URL+"?acao=listar_usuarios")
     .then(function(r){return r.json();})
     .then(function(dados){
@@ -536,7 +597,7 @@ function carregarLideres(sel1,sel2){
       selL1.innerHTML='<option value="">Nenhum</option>';
       selL2.innerHTML='<option value="">Nenhum</option>';
       dados.forEach(function(p){
-        if(p.perfil==="Lider"){
+        if(p.perfil==="Admin"||p.perfil==="Lider"){
           var o1=document.createElement("option");o1.value=p.nome;o1.textContent=p.nome;selL1.appendChild(o1);
           var o2=document.createElement("option");o2.value=p.nome;o2.textContent=p.nome;selL2.appendChild(o2);
         }
@@ -555,7 +616,7 @@ function abrirModalNovoUsuario(){
   document.getElementById("m-codigo").placeholder="Código fornecido ao usuário";
   document.getElementById("m-perfil").value="Liderado";
   document.getElementById("m-setor").value="";
-  carregarLideres("","");
+  preencherLideres("","");
   document.getElementById("modal-usuario").classList.remove("escondido");
 }
 
@@ -579,7 +640,7 @@ function abrirModalEditarUsuario(nome){
       selL1.innerHTML='<option value="">Nenhum</option>';
       selL2.innerHTML='<option value="">Nenhum</option>';
       dados.forEach(function(p){
-        if(p.perfil==="Lider"){
+        if(p.perfil==="Admin"||p.perfil==="Lider"){
           var o1=document.createElement("option");o1.value=p.nome;o1.textContent=p.nome;selL1.appendChild(o1);
           var o2=document.createElement("option");o2.value=p.nome;o2.textContent=p.nome;selL2.appendChild(o2);
         }
@@ -756,31 +817,33 @@ function carregarFeedbacks(){
 }
 
 function editarFeedback(data,de,para){
-  var novoBom=prompt("O que foi bom?");
-  if(novoBom===null)return;
-  var novoMelhorar=prompt("O que pode melhorar?");
-  if(novoMelhorar===null)return;
-  if(!novoBom){mostrarToast("Preencha o campo o que foi bom.");return;}
-  fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({acao:"editar_feedback",solicitante_perfil:usuarioAtual.perfil,data:data,de:de,para:para,bom:novoBom,melhorar:novoMelhorar})})
-    .then(function(r){return r.json();})
-    .then(function(res){
-      if(!res.ok){mostrarToast(res.erro||"Não foi possível editar.");return;}
-      mostrarToast("Feedback editado!");
-      carregarFeedbacks();
-    })
-    .catch(function(){mostrarToast("Falha de conexão.");});
+  abrirFormModal("Editar feedback",[
+    {key:"bom",label:"O que foi bom?",tipo:"textarea",valor:""},
+    {key:"melhorar",label:"O que pode melhorar?",tipo:"textarea",valor:""}
+  ],function(v){
+    if(!v.bom){mostrarToast("Preencha o campo o que foi bom.");return;}
+    fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({acao:"editar_feedback",solicitante_perfil:usuarioAtual.perfil,data:data,de:de,para:para,bom:v.bom,melhorar:v.melhorar})})
+      .then(function(r){return r.json();})
+      .then(function(res){
+        if(!res.ok){mostrarToast(res.erro||"Não foi possível editar.");return;}
+        mostrarToast("Feedback editado!");
+        carregarFeedbacks();
+      })
+      .catch(function(){mostrarToast("Falha de conexão.");});
+  });
 }
 
 function excluirFeedback(data,de,para){
-  if(!confirm("Excluir este feedback? Essa ação não pode ser desfeita."))return;
-  fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({acao:"excluir_feedback",solicitante_perfil:usuarioAtual.perfil,data:data,de:de,para:para})})
-    .then(function(r){return r.json();})
-    .then(function(res){
-      if(!res.ok){mostrarToast(res.erro||"Não foi possível excluir.");return;}
-      mostrarToast("Feedback excluído.");
-      carregarFeedbacks();
-    })
-    .catch(function(){mostrarToast("Falha de conexão.");});
+  confirmarSistema("Excluir feedback","Excluir este feedback? Essa ação não pode ser desfeita.",function(){
+    fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({acao:"excluir_feedback",solicitante_perfil:usuarioAtual.perfil,data:data,de:de,para:para})})
+      .then(function(r){return r.json();})
+      .then(function(res){
+        if(!res.ok){mostrarToast(res.erro||"Não foi possível excluir.");return;}
+        mostrarToast("Feedback excluído.");
+        carregarFeedbacks();
+      })
+      .catch(function(){mostrarToast("Falha de conexão.");});
+  });
 }
 
 document.getElementById("form-elogio").addEventListener("submit",function(e){
@@ -928,32 +991,34 @@ function carregarComunicados(){
 }
 
 function editarComunicado(data,tituloAntigo){
-  var novoTitulo=prompt("Título:",tituloAntigo);
-  if(novoTitulo===null)return;
-  var novoTexto=prompt("Texto do comunicado:");
-  if(novoTexto===null)return;
-  if(!novoTitulo||!novoTexto){mostrarToast("Preencha o título e o texto.");return;}
-  fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({acao:"editar_comunicado",solicitante_perfil:usuarioAtual.perfil,data:data,titulo_antigo:tituloAntigo,titulo:novoTitulo,texto:novoTexto,imagem:imagemComunicado})})
-    .then(function(r){return r.json();})
-    .then(function(res){
-      if(!res.ok){mostrarToast(res.erro||"Não foi possível editar.");return;}
-      mostrarToast("Comunicado editado!");
-      imagemComunicado="";
-      carregarComunicados();
-    })
-    .catch(function(){mostrarToast("Falha de conexão.");});
+  abrirFormModal("Editar comunicado",[
+    {key:"titulo",label:"Título",tipo:"text",valor:tituloAntigo},
+    {key:"texto",label:"Texto do comunicado",tipo:"textarea",valor:""}
+  ],function(v){
+    if(!v.titulo||!v.texto){mostrarToast("Preencha o título e o texto.");return;}
+    fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({acao:"editar_comunicado",solicitante_perfil:usuarioAtual.perfil,data:data,titulo_antigo:tituloAntigo,titulo:v.titulo,texto:v.texto,imagem:imagemComunicado})})
+      .then(function(r){return r.json();})
+      .then(function(res){
+        if(!res.ok){mostrarToast(res.erro||"Não foi possível editar.");return;}
+        mostrarToast("Comunicado editado!");
+        imagemComunicado="";
+        carregarComunicados();
+      })
+      .catch(function(){mostrarToast("Falha de conexão.");});
+  });
 }
 
 function excluirComunicado(data,titulo){
-  if(!confirm("Excluir o comunicado "+titulo+"? Essa ação não pode ser desfeita."))return;
-  fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({acao:"excluir_comunicado",solicitante_perfil:usuarioAtual.perfil,data:data,titulo:titulo})})
-    .then(function(r){return r.json();})
-    .then(function(res){
-      if(!res.ok){mostrarToast(res.erro||"Não foi possível excluir.");return;}
-      mostrarToast("Comunicado excluído.");
-      carregarComunicados();
-    })
-    .catch(function(){mostrarToast("Falha de conexão.");});
+  confirmarSistema("Excluir comunicado","Excluir o comunicado "+titulo+"? Essa ação não pode ser desfeita.",function(){
+    fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({acao:"excluir_comunicado",solicitante_perfil:usuarioAtual.perfil,data:data,titulo:titulo})})
+      .then(function(r){return r.json();})
+      .then(function(res){
+        if(!res.ok){mostrarToast(res.erro||"Não foi possível excluir.");return;}
+        mostrarToast("Comunicado excluído.");
+        carregarComunicados();
+      })
+      .catch(function(){mostrarToast("Falha de conexão.");});
+  });
 }
 
 document.getElementById("form-reuniao").addEventListener("submit",function(e){
@@ -1029,22 +1094,21 @@ function aceitarReuniao(id){
 }
 
 function editarReuniao(id){
-  var novaData=prompt("Data e hora da reunião:");
-  if(novaData===null)return;
-  var novaPauta=prompt("Assuntos / pauta:");
-  if(novaPauta===null)return;
-  var novasAcoes=prompt("Ações e próximos passos:");
-  if(novasAcoes===null)return;
-  var novasNotas=prompt("Notas gerais:");
-  if(novasNotas===null)return;
-  fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({acao:"editar_1on1",solicitante_perfil:usuarioAtual.perfil,id:id,data:novaData,lider:usuarioAtual.nome,liderado:usuarioAtual.nome,pauta:novaPauta,acoes:novasAcoes,notas:novasNotas})})
-    .then(function(r){return r.json();})
-    .then(function(res){
-      if(!res.ok){mostrarToast(res.erro||"Não foi possível editar.");return;}
-      mostrarToast("Reunião editada!");
-      carregarReunioes();
-    })
-    .catch(function(){mostrarToast("Falha de conexão.");});
+  abrirFormModal("Editar reunião 1:1",[
+    {key:"data",label:"Data e hora da reunião",tipo:"text",valor:""},
+    {key:"pauta",label:"Assuntos / pauta",tipo:"textarea",valor:""},
+    {key:"acoes",label:"Ações e próximos passos",tipo:"textarea",valor:""},
+    {key:"notas",label:"Notas gerais",tipo:"textarea",valor:""}
+  ],function(v){
+    fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({acao:"editar_1on1",solicitante_perfil:usuarioAtual.perfil,id:id,data:v.data,lider:usuarioAtual.nome,liderado:usuarioAtual.nome,pauta:v.pauta,acoes:v.acoes,notas:v.notas})})
+      .then(function(r){return r.json();})
+      .then(function(res){
+        if(!res.ok){mostrarToast(res.erro||"Não foi possível editar.");return;}
+        mostrarToast("Reunião editada!");
+        carregarReunioes();
+      })
+      .catch(function(){mostrarToast("Falha de conexão.");});
+  });
 }
 
 function comentarReuniao(id){
@@ -1108,25 +1172,23 @@ function carregarMetas(){
 }
 
 function editarMeta(id){
-  var novoTitulo=prompt("Título da meta:");
-  if(novoTitulo===null)return;
-  var novoResponsavel=prompt("Responsável:");
-  if(novoResponsavel===null)return;
-  var novoProgresso=prompt("Progresso (%):");
-  if(novoProgresso===null)return;
-  var novoPrazo=prompt("Prazo:");
-  if(novoPrazo===null)return;
-  var novoSetor=prompt("Setor:");
-  if(novoSetor===null)return;
-  if(!novoTitulo||!novoResponsavel){mostrarToast("Preencha título e responsável.");return;}
-  fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({acao:"editar_meta",solicitante_perfil:usuarioAtual.perfil,id:id,tipo:"Individual",titulo:novoTitulo,responsavel:novoResponsavel,progresso:novoProgresso,prazo:novoPrazo,setor:novoSetor})})
-    .then(function(r){return r.json();})
-    .then(function(res){
-      if(!res.ok){mostrarToast(res.erro||"Não foi possível editar.");return;}
-      mostrarToast("Meta editada!");
-      carregarMetas();
-    })
-    .catch(function(){mostrarToast("Falha de conexão.");});
+  abrirFormModal("Editar meta",[
+    {key:"titulo",label:"Título da meta",tipo:"text",valor:""},
+    {key:"responsavel",label:"Responsável",tipo:"text",valor:""},
+    {key:"progresso",label:"Progresso (%)",tipo:"number",valor:"0"},
+    {key:"prazo",label:"Prazo",tipo:"text",valor:""},
+    {key:"setor",label:"Setor",tipo:"text",valor:""}
+  ],function(v){
+    if(!v.titulo||!v.responsavel){mostrarToast("Preencha título e responsável.");return;}
+    fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({acao:"editar_meta",solicitante_perfil:usuarioAtual.perfil,id:id,tipo:"Individual",titulo:v.titulo,responsavel:v.responsavel,progresso:v.progresso,prazo:v.prazo,setor:v.setor})})
+      .then(function(r){return r.json();})
+      .then(function(res){
+        if(!res.ok){mostrarToast(res.erro||"Não foi possível editar.");return;}
+        mostrarToast("Meta editada!");
+        carregarMetas();
+      })
+      .catch(function(){mostrarToast("Falha de conexão.");});
+  });
 }
 
 function excluirMeta(id){
